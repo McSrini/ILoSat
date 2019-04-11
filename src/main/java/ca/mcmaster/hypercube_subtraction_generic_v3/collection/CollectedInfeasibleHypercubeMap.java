@@ -23,6 +23,8 @@ public class CollectedInfeasibleHypercubeMap {
     //key is # of var fixings
     public   TreeMap<Integer, List<HyperCube>>  collectedHypercubes  = new TreeMap<Integer, List<HyperCube>>();
     
+    
+    
     public CollectedInfeasibleHypercubeMap (){
         
     }
@@ -158,6 +160,9 @@ public class CollectedInfeasibleHypercubeMap {
     }
     
     private List<HyperCube> removeDuplicates (List<HyperCube> newCubes, int size) {
+        
+        
+        
         List<HyperCube> result = new ArrayList<HyperCube>();
         List<HyperCube> existingCubes = this.collectedHypercubes.get(size);
         if (existingCubes==null){
@@ -168,6 +173,7 @@ public class CollectedInfeasibleHypercubeMap {
                 for(HyperCube existingCube : existingCubes){
                     if (existingCube.isDuplicate(newCube )){
                         isDuplicate=true;
+                        //System.out.println("duplicate cube found! " +duplicateCount++);
                         break;
                     }
                 }

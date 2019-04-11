@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ca.mcmaster.hypercube_subtraction_generic_v3.cplex; 
+package ca.mcmaster.hypercube_subtraction_generic_v3.cplex.staticPriority; 
   
+import ca.mcmaster.hypercube_subtraction_generic_v3.cplex.*;
 import ilog.concert.IloException;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
@@ -25,7 +26,6 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.Driver.DOES_MIP_HAVE_
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.*;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.ABOVE_AVG_VARS;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.ALL_VARS;
-import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.NO_BCP;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.*;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM.*;
@@ -37,19 +37,26 @@ import java.util.Map;
 /**
  *
  * @author tamvadss
+ * 
+ * same as hypercube branch handler- except that this handler aborts if in-feasibility is not found after BCP
+ * In that case, it sets static priority list and aborts
+ * 
+ * 
  */
-public class HypercubeBranchHandler extends IloCplex.BranchCallback{
+public class StaticBranchHandler extends IloCplex.BranchCallback{
     
     private final TreeMap<Integer, List<HyperCube>>  collectedHypercubes;
     
+    //higher value= higher priority
+    public  Map<String, Integer> variablesInPriorityOrder= null;
      
-    private static Logger logger=Logger.getLogger(HypercubeBranchHandler.class);
+    private static Logger logger=Logger.getLogger(StaticBranchHandler.class);
     static {
         logger.setLevel(LOGGING_LEVEL);
         PatternLayout layout = new PatternLayout("%5p  %d  %F  %L  %m%n");     
         try {
             RollingFileAppender appender = new  RollingFileAppender(layout,
-                    LOG_FOLDER+HypercubeBranchHandler.class.getSimpleName()+ LOG_FILE_EXTENSION);
+                    LOG_FOLDER+StaticBranchHandler.class.getSimpleName()+ LOG_FILE_EXTENSION);
             appender.setMaxBackupIndex(SIXTY);
             logger.addAppender(appender);
             logger.setAdditivity(false);
@@ -60,7 +67,7 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
         }
     } 
     
-    public HypercubeBranchHandler (       TreeMap<Integer, List<HyperCube>>   infeasibleHypercubeMap ) {
+    public StaticBranchHandler (       TreeMap<Integer, List<HyperCube>>   infeasibleHypercubeMap ) {
         this. collectedHypercubes =infeasibleHypercubeMap;
          
     }
@@ -129,12 +136,13 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                 //we now try to find our candidate branching vars, according to our heuristic
                 List<String> candidateBranchingVars =null;
                 
-                BaseHeuristic branchingHeuristic =BranchingHeuristicFactory.getBranchingHeuristic();
+                SteppedWeightHeuristic branchingHeuristic =new SteppedWeightHeuristic();
                 //  pass the filtered hypercubes to the branching heuristic
                 branchingHeuristic.infeasibleHypercubeMap=filterResult;
                 
                 //prepare for BCP
-                if (TWO==filterResult.firstKey() &&   STEPPED_WEIGHT.equals( HEURISTIC_TO_USE) && !USE_BCP_LEVEL.equals(NO_BCP)){
+                boolean isBCPPrepared = false;
+                if (TWO==filterResult.firstKey() &&   STEPPED_WEIGHT.equals( HEURISTIC_TO_USE)){
                     //prepare for BCP
                     Set<String> bcpCandidateVars = this.getAllVariables_InTwoSizedHypercubes(filterResult);
                     if (EXCLUDE_CPLEX_LP_INTEGRAL_VARS) bcpCandidateVars=  this.getIntegerInfeasibleVariables( bcpCandidateVars);
@@ -147,48 +155,57 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                             getHighFreqVariables_InTwoSizedHypercubes (bcpCandidateVars, filterResult);                       
                     
                     //System.out.println("Size of variablesToUseForBCP "+branchingHeuristic.variablesToUseForBCP.size());
-                    
+                    isBCPPrepared= true;
                 }  
                 
                 //System.out.println("getting branch suggestion for node " + getNodeId());
+                branchingHeuristic.isStaticPriorityOrderWanted=true;                
                 candidateBranchingVars = branchingHeuristic.getBranchingVariableSuggestions( );
                 
-                
-                //System.out.println("candidateBranchingVars "+ candidateBranchingVars.size());
-                 
-                
-                if (candidateBranchingVars!=null && candidateBranchingVars.size()!=ZERO) {
+                if (isBCPPrepared && !branchingHeuristic.wasInfeasibilityDetectedDuringBCP) {
+                     
+                    //set the variable priority list and abort
+
+                    variablesInPriorityOrder =branchingHeuristic.variablesInPriorityOrder;
+
+                    abort();
+                   
+                } else {
+                    if (candidateBranchingVars!=null && candidateBranchingVars.size()!=ZERO) {
                     
-                    //pick one candidate at random
-                    int randomPosition = PERF_VARIABILITY_RANDOM_GENERATOR.nextInt(candidateBranchingVars.size());
-                    String branchingVarDecision = candidateBranchingVars.get(randomPosition );
+                        //pick one candidate at random
+                        int randomPosition = PERF_VARIABILITY_RANDOM_GENERATOR.nextInt(candidateBranchingVars.size());
+                        String branchingVarDecision = candidateBranchingVars.get(randomPosition );
 
-                    // vars needed for child node creation 
-                    IloNumVar[][] vars = new IloNumVar[TWO][] ;
-                    double[ ][] bounds = new double[TWO ][];
-                    IloCplex.BranchDirection[ ][]  dirs = new  IloCplex.BranchDirection[ TWO][];
-                    getArraysNeededForCplexBranching(branchingVarDecision, vars , bounds , dirs);
+                        // vars needed for child node creation 
+                        IloNumVar[][] vars = new IloNumVar[TWO][] ;
+                        double[ ][] bounds = new double[TWO ][];
+                        IloCplex.BranchDirection[ ][]  dirs = new  IloCplex.BranchDirection[ TWO][];
+                        getArraysNeededForCplexBranching(branchingVarDecision, vars , bounds , dirs);
 
-                    //create both kids, pass on infeasible hypercubes from parent      
+                        //create both kids, pass on infeasible hypercubes from parent      
 
-                    double lpEstimate = getObjValue();
+                        double lpEstimate = getObjValue();
 
-                    NodePayload zeroChildData = new NodePayload (  );
-                    zeroChildData.infeasibleHypercubesMap= filterResult;
-                    zeroChildData.parentVarFixings= thisNodesVarFixings;
-                    NodeId zeroChildID =  makeBranch( vars[ZERO][ZERO],  bounds[ZERO][ZERO],
-                                                      dirs[ZERO][ZERO],  lpEstimate  , zeroChildData );
+                        NodePayload zeroChildData = new NodePayload (  );
+                        zeroChildData.infeasibleHypercubesMap= filterResult;
+                        zeroChildData.parentVarFixings= thisNodesVarFixings;
+                        NodeId zeroChildID =  makeBranch( vars[ZERO][ZERO],  bounds[ZERO][ZERO],
+                                                          dirs[ZERO][ZERO],  lpEstimate  , zeroChildData );
 
-                    NodePayload    oneChildData = zeroChildData;
-                    NodeId oneChildID = makeBranch( vars[ONE][ZERO],  bounds[ONE][ZERO],
-                                                         dirs[ONE][ZERO],   lpEstimate, oneChildData );
-                    
+                        NodePayload    oneChildData = zeroChildData;
+                        NodeId oneChildID = makeBranch( vars[ONE][ZERO],  bounds[ONE][ZERO],
+                                                             dirs[ONE][ZERO],   lpEstimate, oneChildData );
 
-                }else {
-                    //no candidates , so take cplex default branching
-                    logger.warn("Took CPLEX default branch at node "+ getNodeId()+ " for lack of candidates");
+
+                    }else {
+                        //no candidates , so take cplex default branching
+                        logger.warn("Took CPLEX default branch at node "+ getNodeId()+ " for lack of candidates");
+                    }
                 }
-
+                
+                //System.out.println("candidateBranchingVars "+ candidateBranchingVars.size() +    " freq "+ getTestFreq(candidateBranchingVars.get(ZERO),filterResult));
+                 
             }
     }
     
@@ -365,7 +382,7 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
     }
     
     //use when we only have 2 sized hypercubes with only 0 fixings, as in set partitioning
-    /*private Set<String>getVariables_InTwoSizedHypercubes_perPair (TreeMap<Integer, List<HyperCube>>  filterResult){
+    private Set<String>getVariables_InTwoSizedHypercubes_perPair (TreeMap<Integer, List<HyperCube>>  filterResult){
         //our return value
         Set<String> resultSet = new HashSet<String> ();  
         
@@ -382,7 +399,7 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
         }   
          
         return resultSet;
-    }*/
+    }
     
     private Set<String>getAllVariables_InTwoSizedHypercubes (TreeMap<Integer, List<HyperCube>>  filterResult){
         //our return value
@@ -479,7 +496,6 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
         //System.out.println("resultSet size "+resultSet);
         return resultSet;
     }
-   
     
     private Set<String> getVarsWithLargestPSeudoCosts (Collection<String> candidateList) throws IloException{
         Set<String> result = new HashSet<String> ();
@@ -488,7 +504,8 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
             
             if (! candidateList.contains( entry.getKey()) ) continue;
             
-            //System.out.println("" + getUpPseudoCost(entry.getValue()) +" "+ getDownPseudoCost(entry.getValue())) ;
+            System.out.println("getUpPseudoCost " + getUpPseudoCost(entry.getValue()) 
+                               +" getDownPseudoCost "+ getDownPseudoCost(entry.getValue())) ;
             
             double higher = Math.max (getUpPseudoCost(entry.getValue()), getDownPseudoCost(entry.getValue())) ;
             if (ZERO> Double.compare(highestKnownPseudoCost, higher)){
@@ -502,5 +519,31 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
         return result;
     }
     
-    
+    private Set<String> getMostInfeasibleVaribales (Collection<String> candidateList) throws IloException{
+        Set<String> result = new HashSet<String> ();
+        double smallestKnownDistanceFromCenter = BILLION;
+        
+        for (String candidate : candidateList){
+             
+            IloNumVar var = Driver.mapOfAllVariablesInTheModel.get(candidate );
+            double diff = Math.abs(  getValue(var) -DOUBLE_ONE/TWO ) ;
+            
+            //System.out.println("diff " +  diff ) ;
+            
+            //smallest diff is the winner
+            if (ZERO> Double.compare(diff, smallestKnownDistanceFromCenter)){
+                smallestKnownDistanceFromCenter= diff;
+                result.clear();
+                result.add( candidate);
+            }else if (ZERO== Double.compare(diff, smallestKnownDistanceFromCenter)){
+                 result.add( candidate);
+            }
+            
+        }
+        
+        System.out.println("smallestKnownDistanceFromCenter " +  smallestKnownDistanceFromCenter ) ;
+        
+        return result;
+    }
+     
 }

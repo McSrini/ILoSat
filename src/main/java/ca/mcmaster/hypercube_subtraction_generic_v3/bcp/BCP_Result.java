@@ -6,6 +6,7 @@
 package ca.mcmaster.hypercube_subtraction_generic_v3.bcp;
 
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
+import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class BCP_Result {
     public Map<Integer, List<HyperCube>  > cubesEliminatedByFixing = new TreeMap<Integer,List<HyperCube>>();
     public double volumeRemoved_BecauseOfFixings = ZERO;
     public double volumeRemoved_BecauseOfMismatch = ZERO;
-    
+        
     public boolean isInfeasibilityDetected = false;   
     
     //this flag is used to climb up levels, starting again from level 2, if fixings found at higher levels
@@ -82,7 +83,7 @@ public class BCP_Result {
 
             if (!wasCubeEliminationAlreadyNoted){
                 double cubeSize = cubeInWhichFixingWasFound.zeroFixingsMap.size()+ cubeInWhichFixingWasFound.oneFixingsMap.size();
-                this.volumeRemoved_BecauseOfFixings+= DOUBLE_ONE/Math.pow(TWO,cubeSize);
+                this.volumeRemoved_BecauseOfFixings+=   DOUBLE_ONE/Math.pow(TWO,cubeSize) ;  
             }
             
         }
@@ -118,11 +119,12 @@ public class BCP_Result {
             for (HyperCube otherCube: otherCubesAtThisLevel){
                 //update volume and best Obj
                 double cubeSize = otherCube.zeroFixingsMap.size()+ otherCube.oneFixingsMap.size();
-                this.volumeRemoved_BecauseOfFixings+= DOUBLE_ONE/Math.pow(TWO,cubeSize);
+                this.volumeRemoved_BecauseOfFixings+= DOUBLE_ONE/Math.pow(TWO,cubeSize)              ;  
  
             }
         }
                 
     }//method merge
-     
+    
+ 
 }

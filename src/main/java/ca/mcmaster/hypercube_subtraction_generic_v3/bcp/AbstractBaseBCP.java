@@ -6,21 +6,26 @@
 package ca.mcmaster.hypercube_subtraction_generic_v3.bcp;
 
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.DOUBLE_ONE;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.FOUR;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ONE;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.THREE;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.TWO;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ZERO;
 import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Driver.IS_THIS_SET_PARTITIONING;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.HEURISTIC_TO_USE; 
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.HyperCube;
-import ca.mcmaster.hypercube_subtraction_generic_v3.common.VariableCoefficientTuple;
-import static ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM.SET_PARTITIONING;
+import ca.mcmaster.hypercube_subtraction_generic_v3.common.VariableCoefficientTuple; 
 import static ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM.STEPPED_WEIGHT;
+import ilog.concert.IloNumVar;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP;
 
 /**
  *
@@ -32,6 +37,8 @@ public abstract class AbstractBaseBCP {
     protected TreeMap < String, BCP_Result> bcpResultMap_OneFix  = new TreeMap < String, BCP_Result>();
     protected   TreeMap<Integer, List<HyperCube>>  infeasibleHypercubeMap =null;
     
+    public boolean isInfeasibleTriggerFoundDuringBCP = false;
+    
     public AbstractBaseBCP (Set<String>  vars,   
                            TreeMap<Integer, List<HyperCube>>  infeasibleHypercubeMap){
         //init maps
@@ -41,8 +48,48 @@ public abstract class AbstractBaseBCP {
         }
         this. infeasibleHypercubeMap= infeasibleHypercubeMap;
     }
+   
+     
     
-    public abstract List<String> performBCP();
+    public abstract List<String> performBCP(boolean saveVariablePriorityOrder);
+    
+    
+    //perform BCP on this trigger  , and return true if infeasibility found
+    //
+    //this method moved into base class, so that set partitioning can also use trigger equivalency
+    //
+    protected  boolean performBCP (VariableCoefficientTuple inputVariableFixing){
+             
+        BCP_Result bcpresult= getCascadedVarFixings (  inputVariableFixing,  infeasibleHypercubeMap);
+
+        //record results  
+        if (Math.round(inputVariableFixing.coeff) > ZERO)    {
+            this.bcpResultMap_OneFix. put (inputVariableFixing.varName , bcpresult);            
+        } else{
+            bcpResultMap_ZeroFix.put (inputVariableFixing.varName , bcpresult);
+        }
+        
+        //for all the fixings in this BCP result,   equivalent  map entries will have the same or inferior result 
+        if (ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP && !bcpresult.isInfeasibilityDetected ){
+            
+            int removedCount = ZERO;
+                    
+            for (Map.Entry <String, Boolean > entry :bcpresult.varFixingsFound.entrySet()){
+                if (inputVariableFixing.varName.equals(entry.getKey()))  continue;
+
+                TreeMap < String, BCP_Result> bcpResultMap_toUse = entry.getValue()? bcpResultMap_OneFix:bcpResultMap_ZeroFix;
+                bcpResultMap_toUse.remove(entry.getKey());      
+                
+                removedCount++;
+            }
+            
+            //System.out.println("removedCount "+removedCount + " for trigger "+ inputVariableFixing.varName + " val "  +inputVariableFixing.coeff) ;
+            
+        }
+             
+        return bcpresult.isInfeasibilityDetected ; 
+    }
+   
     
     protected abstract BCP_Result getCascadedVarFixings (VariableCoefficientTuple inputVariableFixing,
                                             TreeMap<Integer, List<HyperCube>>  infeasibleHypercubeMap) ;
@@ -135,9 +182,7 @@ public abstract class AbstractBaseBCP {
     protected abstract BCP_Result getUncascadedVarFixings (List<VariableCoefficientTuple> inputVarFixings, List<HyperCube> remainingCubesAtThisLevel , 
                                                int thisLevel) ;
     
-    //perform BCP for a fixing is different in only that equivalency does not exist for set partitioning
-    protected abstract boolean performBCP (VariableCoefficientTuple inputVariableFixing);
-    
+     
     
     //augments current var fixings with new fixings found, and return true if conflict detected
     protected boolean augmentVariableFixings(List<VariableCoefficientTuple> existingVariableFixings, 
@@ -169,14 +214,20 @@ public abstract class AbstractBaseBCP {
         return isConflictFound;
     }
     
+    protected int getNumTriggersRemaining() {
+        
+        return bcpResultMap_OneFix.size() + bcpResultMap_ZeroFix.size();
+    }
     
     protected  VariableCoefficientTuple getNextTrigger (){
         VariableCoefficientTuple result = null;
                 
         //System.out.println("triggers left " + (bcpResultMap_OneFix.size()+bcpResultMap_ZeroFix.size()));
         
-        if ((Driver.ARE_ALL_VARS_SAME_SIGN>ZERO) || HEURISTIC_TO_USE.equals( SET_PARTITIONING)){
-            //all 1 hypercubes, use 1 triggers   
+        //for set partitioning, since we consider vars in size2 hypercubes, 0 and 1 triggers both cause BCP       
+        
+        if ((Driver.ARE_ALL_VARS_SAME_SIGN>ZERO)    || Driver.IS_THIS_SET_PARTITIONING     ){
+            //if all 1 hypercubes, or set partitioning,  use 1 triggers   
             //check if any pending triggers in the 1 fix map
             for (Map.Entry < String, BCP_Result> entry : bcpResultMap_OneFix.entrySet()){
                 if (null==entry.getValue()){
@@ -217,24 +268,65 @@ public abstract class AbstractBaseBCP {
     
     protected void addMismatchVolume_EliminatedByFixings (  BCP_Result finalResult) {
         for (Map.Entry < Integer,List<HyperCube>> entry : this.infeasibleHypercubeMap.entrySet()){
+            
+            int thisLevel = entry.getKey();
+            
+             
+            
             //find cubes not eliminated because of fixings
             List<HyperCube> remainingCubesAtThisLevel = new ArrayList<HyperCube>();
             remainingCubesAtThisLevel.addAll(entry.getValue());
 
-            if (null!=finalResult.cubesEliminatedByFixing.get(entry.getKey())){
-                remainingCubesAtThisLevel.removeAll(finalResult.cubesEliminatedByFixing.get(entry.getKey()));
+            if (null!=finalResult.cubesEliminatedByFixing.get(thisLevel)){
+                remainingCubesAtThisLevel.removeAll(finalResult.cubesEliminatedByFixing.get(thisLevel));
             }            
             
             // of these reamining cubes, check which are eliminated because of the var fixings due to mismatch 
             //Note that  these are cubes that did not result in fixings
             for (HyperCube reaminingCube : remainingCubesAtThisLevel){
                 if (isEliminatedByMismatch (reaminingCube, finalResult.varFixingsFound) ){
+                     
                     double cubeSize = reaminingCube.zeroFixingsMap.size()+ reaminingCube.oneFixingsMap.size();
                     finalResult.volumeRemoved_BecauseOfMismatch+= DOUBLE_ONE/Math.pow(TWO,cubeSize);
+
+                                        
+                } else  if (THREE==thisLevel && CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL ) {
+                    
+                    // for SAT problems, we consider 3 size cubes with 1 var fixed
+                    if (isOneVariableMatched (  reaminingCube, finalResult.varFixingsFound)) {
+                        //removed vol is half of 2^-3
+                        finalResult.volumeRemoved_BecauseOfMismatch+= DOUBLE_ONE/Math.pow(TWO, FOUR);
+                    }
                 }
             }
             
         }
+    }
+    
+    protected boolean isOneVariableMatched (HyperCube reaminingCube, Map<String, Boolean> varFixingsFound  ){
+        boolean result = false;
+        
+        for (Map.Entry <String, Boolean> entry : varFixingsFound.entrySet()){
+            String fixedVar = entry.getKey();
+            if (entry.getValue()){
+                //1 fixning
+                if (reaminingCube. oneFixingsMap.keySet().contains( fixedVar)){
+                    //match
+                    result = true ;
+                    break;                    
+                }
+            }else {
+                //0 fixing
+                if (reaminingCube.zeroFixingsMap.containsKey(fixedVar )){
+                    //match
+                    result = true ;
+                    break; 
+                }
+            }
+        }
+        
+         
+        return result;
     }
     
     protected boolean isEliminatedByMismatch (HyperCube reaminingCube, Map<String, Boolean> varFixingsFound  ){

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 
 /**
  *
@@ -21,20 +22,24 @@ import java.util.Map;
  * 
  */
 public  abstract class SteppedHeuristic extends BaseHeuristic{
+    
+    public boolean useReverseMOMs = false;
      
     
     public SteppedHeuristic(){
         
     }
     
-    public   List<String> getBranchingVariableSuggestions (){
+    public   List<String> getBranchingVariableSuggestions ( ){
         
         List<String> candidateVars = new ArrayList<String> ();
                
         int levelsExamined = ZERO;
-        for (Map.Entry <Integer, List<HyperCube>> entry: infeasibleHypercubeMap.entrySet()){
+        NavigableMap<Integer, List<HyperCube>> navigableMap= useReverseMOMs ? 
+                                                           infeasibleHypercubeMap.descendingMap(): infeasibleHypercubeMap;
+        for (Map.Entry <Integer, List<HyperCube>> entry: navigableMap.entrySet()){
             
-            if (levelsExamined>LOOKAHEAD_LEVELS) break;
+            if (levelsExamined>LOOKAHEAD_LEVELS_MOMS) break;
                         
             List<HyperCube> cubesAtThisLevel = entry.getValue();
             

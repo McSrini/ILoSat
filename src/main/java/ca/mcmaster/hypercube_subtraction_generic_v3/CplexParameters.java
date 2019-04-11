@@ -35,6 +35,9 @@ public class CplexParameters {
     //since we overrule cplex anyway during ramp up
     public static final int  FAST_CPLEX_BRANCH_STRATEGY = IloCplex.VariableSelect.MinInfeas;
     
+    //use if default cplex is very slow to branch some MIPs
+    //public static final boolean USE_BARRIER_AND_REDUCED_COSTS = false;
+    
     public static final int RAMP_UP_DURATION_HOURS= 1;  
     public static final int SOLUTION_DURATION_HOURS= 20*24 ;  //20 DAYS MAXIMUM
     

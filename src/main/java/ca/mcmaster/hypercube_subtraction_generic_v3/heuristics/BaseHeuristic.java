@@ -25,15 +25,21 @@ public abstract class BaseHeuristic {
     public  TreeMap<Integer, List<HyperCube>> infeasibleHypercubeMap ;
     
     public Set<String>  variablesToUseForBCP ;
+    
+    public boolean wasInfeasibilityDetectedDuringBCP = false;
+    public  Map<String, Integer> variablesInPriorityOrder= null;
      
     protected TreeMap<String, Integer> scoreMap_Regular = new TreeMap<String, Integer> ();
     //another map for the complemented variable
     protected TreeMap<String, Integer> scoreMap_Complimented = new TreeMap<String, Integer> ();
     
+      
+    
     public BaseHeuristic(  ) {
         
     } 
-    public  abstract List<String> getBranchingVariableSuggestions ();
+    
+    public  abstract List<String> getBranchingVariableSuggestions ( );
     
     
 }

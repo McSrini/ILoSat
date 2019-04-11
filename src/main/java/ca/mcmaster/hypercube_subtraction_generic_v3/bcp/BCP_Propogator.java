@@ -9,8 +9,9 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.DOUBLE_ONE;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ONE;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.TWO;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ZERO;  
-import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
-import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_EQUIVALENT_CHECK_BCP;
+import ca.mcmaster.hypercube_subtraction_generic_v3.Driver; 
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Driver.IS_THIS_SET_PARTITIONING;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.VariableCoefficientTuple;
 import ilog.concert.IloNumVar;
@@ -22,6 +23,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_TWO_SIDED_BCP_METRIC;
 
 /**
  *
@@ -32,20 +35,47 @@ import java.util.TreeMap;
  */
 public class BCP_Propogator extends AbstractBaseBCP{
     
+    private TreeMap < Double, List<String>> variablePriorityOrderMap = new TreeMap < Double, List<String>> ();
+    
     public BCP_Propogator (Set<String>  vars,   
                            TreeMap<Integer, List<HyperCube>>  infeasibleHypercubeMap){
         super(vars,    infeasibleHypercubeMap);
     }
     
+    //used to set static priority orders , post BCP
+    public Map<String, Integer> getAllVariablesInPriorityOrder (){
+        
+        Map<String, Integer>   result = new TreeMap<String, Integer>   ();
+        
+        int priority = ONE;
+        for (List<String> varList :variablePriorityOrderMap .values()){
+            for (String str: varList ){
+                result.put( str, priority );
+            }
+            priority            ++;
+        }        
+        
+        return result;
+        
+    }
     
-    public List<String> performBCP(){
+    public List<String> performBCP(boolean saveVariablePriorityOrder){
         
         List<String> candidates = new ArrayList<String>();
         boolean isInfeasible =false;
         
-        VariableCoefficientTuple trigger =  getNextTrigger ();     
+        VariableCoefficientTuple trigger =  getNextTrigger (); 
+        
+        //System.out.println( "getNumTriggersRemaining start" + getNumTriggersRemaining());
          
-        while (trigger != null){             
+        int iterationCount = ZERO;
+        
+        while (trigger != null){      
+            
+            iterationCount++  ;
+            
+            //System.out.println( " itercount "+ iterationCount);
+            
             isInfeasible = performBCP (  trigger);
              
             if (isInfeasible){
@@ -56,7 +86,9 @@ public class BCP_Propogator extends AbstractBaseBCP{
             trigger =  getNextTrigger ();
         }
          
+        //System.out.println( "getNumTriggersRemaining end " + getNumTriggersRemaining() + " itercount "+ iterationCount);
         
+        isInfeasibleTriggerFoundDuringBCP = isInfeasible; //no need for extra variable
         
         if (! isInfeasible){
             //we must find the best candidates
@@ -70,14 +102,18 @@ public class BCP_Propogator extends AbstractBaseBCP{
             
             for (String var: allVarsIn_BCPResultMaps){
                 double zeroSideVolumeRemoved = ZERO;
+                int zeroSideVarFixCount = ZERO;
                 if (bcpResultMap_ZeroFix.containsKey(var)){
                     zeroSideVolumeRemoved = bcpResultMap_ZeroFix.get(var).volumeRemoved_BecauseOfFixings+
                                             bcpResultMap_ZeroFix.get(var).volumeRemoved_BecauseOfMismatch;
+                    zeroSideVarFixCount = bcpResultMap_ZeroFix.get(var).varFixingsFound.size();
                 }
                 double oneSideVolumeRemoved = ZERO;
+                int oneSideVarFixCount = ZERO;
                 if (bcpResultMap_OneFix.containsKey(var)) {
                     oneSideVolumeRemoved=   bcpResultMap_OneFix.get(var).volumeRemoved_BecauseOfFixings+
                                             bcpResultMap_OneFix.get(var).volumeRemoved_BecauseOfMismatch;
+                    oneSideVarFixCount= bcpResultMap_OneFix.get(var).varFixingsFound.size();
                 }
                    
                 //note: if entry is missing from map, it is because 
@@ -87,9 +123,26 @@ public class BCP_Propogator extends AbstractBaseBCP{
                 //System.out.println("oneSideVolumeRemoved  = "+oneSideVolumeRemoved);
                 //System.out.println("zeroSideVolumeRemoved = "+zeroSideVolumeRemoved);
                 
+                
+                
                 //greedily  prefer the trigger which removes largest volume
                 double primaryMetric = Math.max(zeroSideVolumeRemoved , oneSideVolumeRemoved) ;                 
-                double secondaryMetric = Math.min(zeroSideVolumeRemoved , oneSideVolumeRemoved) ;                 
+                double secondaryMetric = Math.min(zeroSideVolumeRemoved , oneSideVolumeRemoved) ;    
+                if (ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED) {
+                    primaryMetric =  Math.max(zeroSideVarFixCount,  oneSideVarFixCount);
+                    secondaryMetric = Math.min(zeroSideVarFixCount,  oneSideVarFixCount);
+                } 
+                
+                if (!ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP && ENABLE_TWO_SIDED_BCP_METRIC ) {
+                    //when there is no trigger equivalence, we change the metric to the sum of volume removed from both sides
+                    primaryMetric =  zeroSideVolumeRemoved+ oneSideVolumeRemoved ;   
+                    if (ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED){
+                        primaryMetric =   zeroSideVarFixCount+  oneSideVarFixCount;
+                    }
+                    secondaryMetric = ZERO; //unused
+                }
+                
+                
                 
                 if (ZERO > Double.compare(bestKnown_primaryMetric, primaryMetric)){
                     
@@ -98,6 +151,9 @@ public class BCP_Propogator extends AbstractBaseBCP{
                     candidates.clear();
                     candidates.add(var);
                     
+                    //System.out.println("Winner decided on primary metric" );
+                     
+                    
                 }else if (ZERO == Double.compare(bestKnown_primaryMetric,primaryMetric)){
                     //prefer candidate with better secondary metric
                     if (ZERO > Double.compare(bestKnown_secondaryMetric, secondaryMetric)){
@@ -105,9 +161,20 @@ public class BCP_Propogator extends AbstractBaseBCP{
                         bestKnown_secondaryMetric=secondaryMetric;
                         candidates.clear();
                         candidates.add(var);
+                        //System.out.println("Winner decided on secondary metric" );
                     }else if (ZERO == Double.compare(bestKnown_secondaryMetric,secondaryMetric)){
                         candidates.add(var);     
+                        //System.out.println("Added tied candidate" );
                     }                                   
+                }
+                
+                if (saveVariablePriorityOrder){
+                    List<String> existing = this.variablePriorityOrderMap.get( primaryMetric);
+                    if (null==existing){
+                        existing = new ArrayList <String>();
+                    }
+                    existing.add(var) ;
+                    variablePriorityOrderMap.put (primaryMetric, existing) ;
                 }
                 
             }
@@ -118,36 +185,13 @@ public class BCP_Propogator extends AbstractBaseBCP{
         } 
                 
         //System.out.println("candidates size "+ candidates.size());
+        //if (ONE==candidates.size()) System.out.println("candidates is  "+ candidates.get(ZERO));
+            
         return         candidates;        
     }
         
          
     
-    //perform BCP on this trigger  , and return true if infeasibility found
-    protected  boolean performBCP (VariableCoefficientTuple inputVariableFixing){
-             
-        BCP_Result bcpresult= getCascadedVarFixings (  inputVariableFixing,  infeasibleHypercubeMap);
-
-        //record results  
-        if (Math.round(inputVariableFixing.coeff) > ZERO)    {
-            this.bcpResultMap_OneFix. put (inputVariableFixing.varName , bcpresult);            
-        } else{
-            bcpResultMap_ZeroFix.put (inputVariableFixing.varName , bcpresult);
-        }
-        
-        //for all the fixings in this BCP result,   equivalent  map entries will have the same or inferior result 
-        if (ENABLE_EQUIVALENT_CHECK_BCP && !bcpresult.isInfeasibilityDetected ){
-            for (Entry <String, Boolean > entry :bcpresult.varFixingsFound.entrySet()){
-                if (inputVariableFixing.varName.equals(entry.getKey()))  continue;
-
-                TreeMap < String, BCP_Result> bcpResultMap_toUse = entry.getValue()? bcpResultMap_OneFix:bcpResultMap_ZeroFix;
-                bcpResultMap_toUse.remove(entry.getKey());             
-            }
-        }
-             
-        return bcpresult.isInfeasibilityDetected ; 
-    }
-   
     
     //start from lowest level >=2 , and get all var fixings
     //then get all fixings at next higher level , and so on
@@ -240,4 +284,6 @@ public class BCP_Propogator extends AbstractBaseBCP{
         
     }
     
+    
+  
 }

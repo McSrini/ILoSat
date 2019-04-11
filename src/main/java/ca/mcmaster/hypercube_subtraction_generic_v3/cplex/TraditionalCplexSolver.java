@@ -7,17 +7,23 @@ package ca.mcmaster.hypercube_subtraction_generic_v3.cplex;
  
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.*;
+import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.*;
+import ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_Propogator; 
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
+import ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM;
 import ilog.concert.IloException;
 import ilog.concert.IloLPMatrix;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
+import static ilog.cplex.IloCplex.Algorithm.None;
 import static ilog.cplex.IloCplex.IncumbentId;
 import static ilog.cplex.IloCplex.Status.Infeasible;
 import static ilog.cplex.IloCplex.Status.Optimal;
+import static ilog.cplex.IloCplex.VariableSelect.PseudoReduced;
 import java.io.File;
 import static java.lang.System.exit;
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 import org.apache.log4j.Logger;
@@ -55,14 +61,14 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
         
         if (DISABLE_CUTS) cplex.setParam(IloCplex.Param.MIP.Limits.CutPasses, -ONE);
         
-        
-        
         if (USE_PURE_CPLEX){
             branchingCallback=new EmptyBranchHandler();
-        }else {
+             
+        }else   {
             branchingCallback=new HypercubeBranchHandler( infeasibleHypercubeMap );
             cplex.setParam(IloCplex.IntParam.VarSel,  FAST_CPLEX_BRANCH_STRATEGY);
-        }
+            
+        }     
         
     }
     
@@ -98,7 +104,7 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
         for (int hours=ZERO; hours < solveDurationHours; hours ++){
             
             if (isHaltFilePresent()) break;
-            
+             
             cplex.clearCallbacks();
             cplex.setParam(IloCplex.IntParam.VarSel,   IloCplex.VariableSelect.DefaultVarSel);
              
@@ -124,5 +130,7 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
         
          
     }
+    
+     
    
 }

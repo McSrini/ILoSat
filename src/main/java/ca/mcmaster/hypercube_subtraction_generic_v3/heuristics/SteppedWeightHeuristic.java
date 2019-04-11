@@ -24,7 +24,10 @@ import java.util.TreeMap;
  */
 public class SteppedWeightHeuristic extends SteppedHeuristic{
     
-    public   List<String> getBranchingVariableSuggestions (){
+    //set this flag to save static priority order of branching varaibles
+    public boolean isStaticPriorityOrderWanted= false;
+    
+    public   List<String> getBranchingVariableSuggestions ( ){
         
         List<String> candidateVars = new ArrayList<String> ();
         
@@ -51,7 +54,7 @@ public class SteppedWeightHeuristic extends SteppedHeuristic{
                  
             }else {
                 //simply use stepped weight as defined in my parent class
-                candidateVars=super.getBranchingVariableSuggestions();
+                candidateVars=super.getBranchingVariableSuggestions( );
                  
             }
         }
@@ -65,7 +68,16 @@ public class SteppedWeightHeuristic extends SteppedHeuristic{
    
     
     private List<String> selectCandidatesWithBest_BCP (Set<String>  vars, 
-            TreeMap<Integer, List<HyperCube>> filterResult ){
-        return ( new BCP_Propogator (vars, filterResult) ).performBCP();
+            TreeMap<Integer, List<HyperCube>> filterResult  ){
+        BCP_Propogator propogator = new BCP_Propogator (vars, filterResult);
+        List<String>  result = propogator.performBCP(isStaticPriorityOrderWanted);
+        
+        this.wasInfeasibilityDetectedDuringBCP=propogator.isInfeasibleTriggerFoundDuringBCP;
+        if (isStaticPriorityOrderWanted && ! wasInfeasibilityDetectedDuringBCP){
+            //save the priority order
+            this.variablesInPriorityOrder= propogator.getAllVariablesInPriorityOrder();
+        }
+        
+        return result;
     }
 }

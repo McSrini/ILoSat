@@ -12,6 +12,7 @@ import ca.mcmaster.hypercube_subtraction_generic_v3.collection.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.cplex.BaseCplexSolver;
 import ca.mcmaster.hypercube_subtraction_generic_v3.cplex.TraditionalCplexSolver;
+import ca.mcmaster.hypercube_subtraction_generic_v3.cplex.staticPriority.StaticCplexSolver;
 import ca.mcmaster.hypercube_subtraction_generic_v3.utils.MIPReader;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
@@ -51,6 +52,7 @@ public class Driver {
     //used to limit BCP to level 2
     public   static int ARE_ALL_VARS_SAME_SIGN  ;
     public static boolean DOES_MIP_HAVE_TWO_VARIABLES_IN_EVERY_CONSTRAINT;
+    public static boolean IS_THIS_SET_PARTITIONING = false;
     
     private static CollectedInfeasibleHypercubeMap collectedHypercubeMap = new CollectedInfeasibleHypercubeMap();
        
@@ -90,6 +92,8 @@ public class Driver {
                 mapOfAllVariablesInTheModel.put (var.getName(), var );
             }
             System.out.println ("DONE preparing vars. Total is  "+ mapOfAllVariablesInTheModel.size());  
+            
+            IS_THIS_SET_PARTITIONING = MIPReader.isThisSetpartitioning (mip);
                  
             logger.info ("preparing constraints ... ");
             mipConstraintList= MIPReader.getConstraintsFast(mip);
@@ -155,11 +159,27 @@ public class Driver {
             DOES_MIP_HAVE_TWO_VARIABLES_IN_EVERY_CONSTRAINT = collectedHypercubeMap.collectedHypercubes.firstKey()==TWO &&
                                                               collectedHypercubeMap.collectedHypercubes.lastKey()==TWO ;
             
-            //solve with cplex
+            boolean useStaticSolver = false;
+            if (  DOES_MIP_HAVE_TWO_VARIABLES_IN_EVERY_CONSTRAINT && DETECT_STATIC_VARIABLE_PRIORITIES ){
+                useStaticSolver =true;
+            }
+            if (FORCE_STATIC_VARIABLE_PRIORITIES) useStaticSolver =true;  
+            
             
             printParameters();
-                
-            BaseCplexSolver cplexSolver =  new TraditionalCplexSolver ( collectedHypercubeMap.collectedHypercubes) ;
+            
+            //solve with cplex
+            BaseCplexSolver cplexSolver =null;
+            if (useStaticSolver && !USE_PURE_CPLEX) {
+                //only the traditional solver can solve with pure cplex   
+                cplexSolver =new StaticCplexSolver ( collectedHypercubeMap.collectedHypercubes);
+                logger.info("using static solver" );
+            }else {
+                cplexSolver=new TraditionalCplexSolver ( collectedHypercubeMap.collectedHypercubes) ;
+                logger.info("using traditional solver" );
+            }
+
+                                          
             logger.info ("starting cplex solve ... " );
             System.out.println("starting cplex solve ... ");
             cplexSolver.solve( RAMP_UP_DURATION_HOURS,SOLUTION_DURATION_HOURS);
@@ -253,6 +273,13 @@ public class Driver {
         for (LowerBoundConstraint lbc : mipConstraintList) {
             //System.out.println("Collected hypercubes for " + lbc.printMe());
             
+            if (MIP_FILENAME .contains( "rmine10.mps")   ){
+                if ( lbc.name.contains("cap")){
+                    System.out.println("skip hypercube collection for capacity constraint "+lbc.name);
+                    continue;
+                }
+            }
+            
             if (MIP_FILENAME .contains( "opm2-z12-s7.mps") || MIP_FILENAME .contains( "opm2-z12-s8") ){
                 //ignore capacity constraints for cube collection
                 List<String> capacityCosntraints = new ArrayList<String>();
@@ -287,6 +314,13 @@ public class Driver {
             }
              
             if (MIP_FILENAME .contains( "reblock354")){
+                if ( lbc.name.contains("CAP")){
+                    System.out.println("skip hypercube collection for capacity constraint "+lbc.name);
+                    continue;
+                }
+            }
+            
+            if (MIP_FILENAME .contains( "seymour-disj-10")){
                 if ( lbc.name.contains("CAP")){
                     System.out.println("skip hypercube collection for capacity constraint "+lbc.name);
                     continue;
@@ -341,7 +375,7 @@ public class Driver {
         logger.info ("PERF_VARIABILITY_RANDOM_SEED "+ PERF_VARIABILITY_RANDOM_SEED) ;
     
      
-        logger.info ("USE_PURE_CPLEX "+ USE_PURE_CPLEX) ;
+        logger.info ("USE_PURE_CPLEX "+  Parameters.USE_PURE_CPLEX) ;
         logger.info ("NUM_ADJACENT_VERTICES_TO_COLLECT "+ NUM_ADJACENT_VERTICES_TO_COLLECT) ;
         
         logger.info ("MERGE_COLLECTED_HYPERCUBES "+ MERGE_COLLECTED_HYPERCUBES) ;
@@ -353,7 +387,8 @@ public class Driver {
         
         logger.info ("SHUFFLE_CONSTRAINT "+ SHUFFLE_THE_CONSTRAINTS) ;
         
-        logger.info ("LOOKAHEAD_LEVELS "+ LOOKAHEAD_LEVELS) ;
+        logger.info ("LOOKAHEAD_LEVELS MOMS "+ LOOKAHEAD_LEVELS_MOMS) ;
+        logger.info ("MAX_DEPTH_LEVELS_JERRY_WANG "+ Parameters.MAX_DEPTH_LEVELS_JERRY_WANG) ;
         logger.info ("SORT_THE_CONSTRAINT "+ SORT_THE_CONSTRAINTS) ;
         
         logger.info ("NUMBER_OF_ADDITIONAL_HYPERCUBE_COLLECTION_ROUNDS "+ NUMBER_OF_ADDITIONAL_HYPERCUBE_COLLECTION_ROUNDS) ;
@@ -372,10 +407,24 @@ public class Driver {
                 
         logger.info ("USE_ONLY_MAX_PSEDUDO_COST_VARS  "+  USE_ONLY_MAX_PSEDUDO_COST_VARS  );
         
-        logger.info ("ENABLE_EQUIVALENT_CHECK_BCP  "+  ENABLE_EQUIVALENT_CHECK_BCP  );
+        logger.info ("ENABLE_EQUIVALEN_TTRIGGER_CHECK_FOR_BCP  "+  ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP  );
         
+        logger.info ("IS_THIS_SET_PARTITIONING  "+  IS_THIS_SET_PARTITIONING  );
         
-    }
-    
+                
+        //logger.info ("USE_BARRIER_AND_REDUCED_COSTS  "+  USE_BARRIER_AND_REDUCED_COSTS  );
+        
+        //logger.info ("USE_ONLY_MAX_INFEASIBLE_VARS  "+  USE_ONLY_MAX_INFEASIBLE_VARS  );
+        
+        logger.info ("FORCE_STATIC_VARIABLE_PRIORITIES  "+  FORCE_STATIC_VARIABLE_PRIORITIES  );
+        logger.info ("DETECT_STATIC_VARIABLE_PRIORITIES  "+  DETECT_STATIC_VARIABLE_PRIORITIES  );
+        
+        logger.info ("CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL  "+  CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL  );
+        
+        logger.info (" ENABLE_TWO_SIDED_BCP_METRIC " + ENABLE_TWO_SIDED_BCP_METRIC);
+        logger.info (" ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED " + ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED);
+        
+                
+    }    
     
 }

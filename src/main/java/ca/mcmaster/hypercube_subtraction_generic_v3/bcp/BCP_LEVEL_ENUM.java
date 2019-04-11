@@ -12,6 +12,7 @@ package ca.mcmaster.hypercube_subtraction_generic_v3.bcp;
 public enum BCP_LEVEL_ENUM {
     ALL_VARS,
     ABOVE_AVG_VARS,
-    ONLY_MAXFREQ_VARS
+    ONLY_MAXFREQ_VARS,
+    NO_BCP //do not do BCP
     
 }

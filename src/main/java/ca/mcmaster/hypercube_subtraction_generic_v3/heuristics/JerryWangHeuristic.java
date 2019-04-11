@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.MAX_DEPTH_LEVELS_JERRY_WANG;
 
 /**
  *
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 public class JerryWangHeuristic extends BaseHeuristic{
 
-    public   List<String> getBranchingVariableSuggestions (){
+    public   List<String> getBranchingVariableSuggestions ( ) {
         
         List<String> candidateVars = new ArrayList<String> ();
         
@@ -32,7 +33,7 @@ public class JerryWangHeuristic extends BaseHeuristic{
         for (Map.Entry <Integer, List<HyperCube>> entry: infeasibleHypercubeMap.descendingMap().entrySet()){
             
             int thisLevel = entry.getKey();
-            if (thisLevel> TEN+LOWEST_LEVEL){
+            if (thisLevel>  MAX_DEPTH_LEVELS_JERRY_WANG +LOWEST_LEVEL){
                 continue;
             }
                         
