@@ -20,6 +20,7 @@ import static ilog.cplex.IloCplex.Algorithm.None;
 import static ilog.cplex.IloCplex.IncumbentId;
 import static ilog.cplex.IloCplex.Status.Infeasible;
 import static ilog.cplex.IloCplex.Status.Optimal;
+import static ilog.cplex.IloCplex.VariableSelect.Pseudo;
 import static ilog.cplex.IloCplex.VariableSelect.PseudoReduced;
 import java.io.File;
 import static java.lang.System.exit;

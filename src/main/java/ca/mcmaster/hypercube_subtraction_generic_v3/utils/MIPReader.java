@@ -7,8 +7,9 @@ package ca.mcmaster.hypercube_subtraction_generic_v3.utils;
   
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
-import ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.*;  
+import ca.mcmaster.hypercube_subtraction_generic_v3.Parameters;  
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.HEURISTIC_TO_USE;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.NO_BCP;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.LowerBoundConstraint;
 import ilog.concert.IloException;
 import ilog.concert.IloLPMatrix;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.VariableCoefficientTuple;
+import ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM;
 
 /**
  *
@@ -108,7 +110,7 @@ public class MIPReader {
         for (int index=ZERO; index < numConstraints ; index ++ ){
             
             String thisConstraintname = ranges[index].getName();
-            System.out.println("Constarint is : " + thisConstraintname + " lenght is " +ind[index].length);//k
+            //System.out.println("Constarint is : " + thisConstraintname + " lenght is " +ind[index].length);//k
             
             
                        
@@ -135,7 +137,9 @@ public class MIPReader {
                 
                  
                 
-                if (Driver.IS_THIS_SET_PARTITIONING   && ind[index].length>ONE){
+                if (Driver.IS_THIS_SET_PARTITIONING   && ind[index].length>ONE  
+                        && !Parameters.USE_BCP_LEVEL.equals( NO_BCP) && 
+                        HEURISTIC_TO_USE.equals( BRANCHING_HEURISTIC_ENUM.STEPPED_WEIGHT)){
                     //add all 2 size constraints, with all pairs in this constraint
                     for (LowerBoundConstraint pairConstraint : getPairConstraints ( lbcUP)){
                         result.add(pairConstraint);

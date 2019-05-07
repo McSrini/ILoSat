@@ -94,6 +94,8 @@ public class Driver {
             System.out.println ("DONE preparing vars. Total is  "+ mapOfAllVariablesInTheModel.size());  
             
             IS_THIS_SET_PARTITIONING = MIPReader.isThisSetpartitioning (mip);
+            
+           
                  
             logger.info ("preparing constraints ... ");
             mipConstraintList= MIPReader.getConstraintsFast(mip);
@@ -148,7 +150,7 @@ public class Driver {
                 collectedHypercubeMap .absorb();
             }
             
-            collectedHypercubeMap.printCollectedHypercubes(true);
+            //collectedHypercubeMap.printCollectedHypercubes(true);
             
             
             //this call is needed to remove cubes marked as merged or absorbed
@@ -403,7 +405,7 @@ public class Driver {
         
         logger.info ("USE_BCP_LEVEL "+  USE_BCP_LEVEL );
         logger.info (" allVarsSameSign "+  Driver.ARE_ALL_VARS_SAME_SIGN );
-        logger.info ("EXCLUDE_CPLEX_LP_INTEGRAL_VARS "+  EXCLUDE_CPLEX_LP_INTEGRAL_VARS );
+         
                 
         logger.info ("USE_ONLY_MAX_PSEDUDO_COST_VARS  "+  USE_ONLY_MAX_PSEDUDO_COST_VARS  );
         
@@ -412,7 +414,7 @@ public class Driver {
         logger.info ("IS_THIS_SET_PARTITIONING  "+  IS_THIS_SET_PARTITIONING  );
         
                 
-        //logger.info ("USE_BARRIER_AND_REDUCED_COSTS  "+  USE_BARRIER_AND_REDUCED_COSTS  );
+        logger.info ("EXCLUDE_CPLEX_LP_INTEGRAL_VARS  "+  EXCLUDE_CPLEX_LP_INTEGRAL_VARS  );
         
         //logger.info ("USE_ONLY_MAX_INFEASIBLE_VARS  "+  USE_ONLY_MAX_INFEASIBLE_VARS  );
         
@@ -421,10 +423,8 @@ public class Driver {
         
         logger.info ("CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL  "+  CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL  );
         
-        logger.info (" ENABLE_TWO_SIDED_BCP_METRIC " + ENABLE_TWO_SIDED_BCP_METRIC);
-        logger.info (" ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED " + ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED);
-        
-                
+        logger.info (" ENABLE_TWO_SIDED_BCP_METRIC " + ENABLE_TWO_SIDED_BCP_METRIC); 
+                        
     }    
     
 }

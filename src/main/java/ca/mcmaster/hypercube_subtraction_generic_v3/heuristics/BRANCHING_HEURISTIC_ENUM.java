@@ -12,6 +12,6 @@ package ca.mcmaster.hypercube_subtraction_generic_v3.heuristics;
 public enum BRANCHING_HEURISTIC_ENUM {
      
     STEPPED_WEIGHT, 
-    JERRY_WANG 
-     
+    JERRY_WANG  ,
+    SET_PARTITIONING_HEURISTIC
 }

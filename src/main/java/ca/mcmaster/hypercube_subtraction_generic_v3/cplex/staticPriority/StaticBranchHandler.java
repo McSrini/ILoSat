@@ -141,7 +141,7 @@ public class StaticBranchHandler extends IloCplex.BranchCallback{
                 branchingHeuristic.infeasibleHypercubeMap=filterResult;
                 
                 //prepare for BCP
-                boolean isBCPPrepared = false;
+                boolean isBCPPrepared = false;               
                 if (TWO==filterResult.firstKey() &&   STEPPED_WEIGHT.equals( HEURISTIC_TO_USE)){
                     //prepare for BCP
                     Set<String> bcpCandidateVars = this.getAllVariables_InTwoSizedHypercubes(filterResult);

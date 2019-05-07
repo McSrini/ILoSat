@@ -19,13 +19,13 @@ public class BranchingHeuristicFactory {
     public static BaseHeuristic getBranchingHeuristic (  ){
         BaseHeuristic heuristic = null;
         
-        /*if (HEURISTIC_TO_USE.equals(BRANCHING_HEURISTIC_ENUM.SET_PARTITIONING)){
-            heuristic = new  SetPartitionHeuristic ();
-        }else */    if (JERRY_WANG.equals(HEURISTIC_TO_USE) ){
+        if (HEURISTIC_TO_USE.equals(BRANCHING_HEURISTIC_ENUM.SET_PARTITIONING_HEURISTIC)){
+            heuristic = new  SetPartitioning_ZeroCount_Heuristic ();
+        }else     if (JERRY_WANG.equals(HEURISTIC_TO_USE) ){
             heuristic = new  JerryWangHeuristic();
         }  else if (HEURISTIC_TO_USE.equals(BRANCHING_HEURISTIC_ENUM.STEPPED_WEIGHT)) {
             heuristic = new SteppedWeightHeuristic();
-        } 
+        }  
         return heuristic;
     }
     

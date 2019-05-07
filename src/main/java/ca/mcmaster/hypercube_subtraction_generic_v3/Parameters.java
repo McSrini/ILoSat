@@ -51,11 +51,9 @@ public class Parameters {
     //public static final String MIP_FILENAME = "f2000.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\f2000.mps";
     
-    //set partitioning
+    //set partitioning    
     public static final String MIP_FILENAME = "neos-807456.mps";
-    //public static final String MIP_FILENAME = "F:\\temporary files here\\neos-807456.mps";
-    //public static final String MIP_FILENAME = "neos-807456.pre.lp";
-    //public static final String MIP_FILENAME = "F:\\temporary files here\\neos807456.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\neos-807456.mps"; 
     //public static final String MIP_FILENAME = "ds.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\ds.mps";
     //public static final String MIP_FILENAME = "t1722.mps";
@@ -121,6 +119,10 @@ public class Parameters {
     //public static final String MIP_FILENAME = "rbcl_xits_09_UNKNOWN.lp"; //do TE with ALL-false
     //public static final String MIP_FILENAME = "F:\\\\temporary files here\\DIMACS_CNF\\cnc\\lp\\rbcl_xits_09_UNKNOWN.lp";
     
+    //public static final String MIP_FILENAME = "ndhf_xits_09_UNSAT.lp";
+    //public static final String MIP_FILENAME = "F:\\\\temporary files here\\DIMACS_CNF\\cnc\\lp\\ndhf_xits_09_UNSAT.lp";  
+    
+    
     //public static final String MIP_FILENAME ="eq.atree.braun.12.unsat.lp";
     //public static final String MIP_FILENAME = "F:\\\\temporary files here\\DIMACS_CNF\\cnc\\lp\\eq.atree.braun.12.unsat.lp"; 
     //include cplex intgeral above avg vars for eq
@@ -128,6 +130,13 @@ public class Parameters {
     //public static final String MIP_FILENAME = "rpoc_xits_09_UNSAT.lp"; no eq
     //public static final String MIP_FILENAME = "F:\\\\temporary files here\\DIMACS_CNF\\cnc\\lp\\rpoc_xits_09_UNSAT.lp";
         
+    //public static final String MIP_FILENAME = "dated-5-19-u.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\DIMACS_CNF\\cnc\\lp\\dated-5-19-u.lp";
+    //public static final String MIP_FILENAME = "gss-24-s100.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\DIMACS_CNF\\cnc\\lp\\gss-24-s100.lp";
+    
+    //dated-5-19-u , sortnet-8-ipc5-h19
+    
     //hoos satlib
     //public static final String MIP_FILENAME = "f2000.lp";
     
@@ -163,36 +172,35 @@ public class Parameters {
     //if too many hypercubes for a constraint, discard them all
     public static final int MAX_HYPERCUBES_PER_CONSTRAINT= BILLION;
     
-    public static final boolean MERGE_COLLECTED_HYPERCUBES = true;
+    public static final boolean MERGE_COLLECTED_HYPERCUBES = false;
     public static final boolean ABSORB_COLLECTED_HYPERCUBES = false;
     
-    public static final BRANCHING_HEURISTIC_ENUM HEURISTIC_TO_USE = BRANCHING_HEURISTIC_ENUM.STEPPED_WEIGHT;
+    public static final BRANCHING_HEURISTIC_ENUM HEURISTIC_TO_USE = BRANCHING_HEURISTIC_ENUM.STEPPED_WEIGHT ;
         
-    public static final int LOOKAHEAD_LEVELS_MOMS =  TEN;
+    public static final int LOOKAHEAD_LEVELS_MOMS =  BILLION;
     public static final int MAX_DEPTH_LEVELS_JERRY_WANG =  TEN;
 
     //shuffle constraint during creation (for perf variablity) before arranging by desired order
     public static final boolean SHUFFLE_THE_CONSTRAINTS = false;
     //do you want to sort vars in a given constraint ? 
-    public static final boolean SORT_THE_CONSTRAINTS =true;
+    public static final boolean SORT_THE_CONSTRAINTS =false;
     //check duplicates?
     public static final boolean CHECK_FOR_DUPLICATES = true;
     //use this parameter to do multiple rounds of collection
     public static final int NUMBER_OF_ADDITIONAL_HYPERCUBE_COLLECTION_ROUNDS = ZERO;
     
-    public static final boolean CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL =   true;
-    public static final boolean ENABLE_TWO_SIDED_BCP_METRIC = true ;
-    public static final boolean ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED = false ;  
+    public static final boolean CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL =  true  ;
+    public static final boolean ENABLE_TWO_SIDED_BCP_METRIC = false  ;
     
-    public static final BCP_LEVEL_ENUM USE_BCP_LEVEL = BCP_LEVEL_ENUM.ALL_VARS      ;
+    public static final BCP_LEVEL_ENUM USE_BCP_LEVEL = BCP_LEVEL_ENUM.ALL_VARS     ;
     public static final boolean EXCLUDE_CPLEX_LP_INTEGRAL_VARS =  true     ;
     public static final boolean USE_ONLY_MAX_PSEDUDO_COST_VARS = false;
      
-    public static final boolean ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP = true;
+    public static final boolean ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP = false  ;
     
     public static final boolean FORCE_STATIC_VARIABLE_PRIORITIES= false;
     public static final boolean DETECT_STATIC_VARIABLE_PRIORITIES= false;
      
-    
+     
 }
 

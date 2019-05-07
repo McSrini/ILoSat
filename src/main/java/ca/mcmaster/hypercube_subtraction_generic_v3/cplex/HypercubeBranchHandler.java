@@ -133,12 +133,12 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                 //  pass the filtered hypercubes to the branching heuristic
                 branchingHeuristic.infeasibleHypercubeMap=filterResult;
                 
-                //prepare for BCP
+                //prepare for BCP                
                 if (TWO==filterResult.firstKey() &&   STEPPED_WEIGHT.equals( HEURISTIC_TO_USE) && !USE_BCP_LEVEL.equals(NO_BCP)){
                     //prepare for BCP
                     Set<String> bcpCandidateVars = this.getAllVariables_InTwoSizedHypercubes(filterResult);
                     if (EXCLUDE_CPLEX_LP_INTEGRAL_VARS) bcpCandidateVars=  this.getIntegerInfeasibleVariables( bcpCandidateVars);
-                    
+                
                     if (USE_ONLY_MAX_PSEDUDO_COST_VARS) bcpCandidateVars = getVarsWithLargestPSeudoCosts (bcpCandidateVars);
                     
                     //if ( USE_ONLY_MAX_INFEASIBLE_VARS) bcpCandidateVars = getMostInfeasibleVaribales(bcpCandidateVars) ;
@@ -182,6 +182,16 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                     NodePayload    oneChildData = zeroChildData;
                     NodeId oneChildID = makeBranch( vars[ONE][ZERO],  bounds[ONE][ZERO],
                                                          dirs[ONE][ZERO],   lpEstimate, oneChildData );
+                    
+                    
+                    /*System.out.println( getNodeId() + " zero child created with " + vars[ZERO][ZERO].getName() + 
+                            " bound " + bounds[ZERO][ZERO] +
+                            " dir " +  dirs[ZERO][ZERO] +
+                            " id " + zeroChildID);
+                    System.out.println( getNodeId() + " one  child created with " + vars[ONE][ZERO].getName() + 
+                            " bound " + bounds[ONE][ZERO] +
+                            " dir " +  dirs[ONE][ZERO] +
+                            " id " + oneChildID);*/
                     
 
                 }else {
@@ -390,6 +400,14 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
         
        
         for (HyperCube cube : filterResult.get (TWO)){
+            
+            /*if (Driver.IS_THIS_SET_PARTITIONING) {
+                //only consider vars in all 0 cubes
+                if (cube.getOneFixingsSize() !=ZERO){
+                    continue ;
+                }
+            }*/
+            
             resultSet.addAll(cube.zeroFixingsMap.keySet());
             resultSet.addAll(cube.oneFixingsMap.keySet());
         }   

@@ -6,7 +6,10 @@
 package ca.mcmaster.hypercube_subtraction_generic_v3.heuristics;
   
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
+import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
+import ca.mcmaster.hypercube_subtraction_generic_v3.Parameters;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.*;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.NO_BCP;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.HyperCube;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,12 +30,22 @@ public  abstract class SteppedHeuristic extends BaseHeuristic{
      
     
     public SteppedHeuristic(){
-        
+         
     }
     
     public   List<String> getBranchingVariableSuggestions ( ){
         
         List<String> candidateVars = new ArrayList<String> ();
+        /*if (useReverseMOMs) {
+            //candiadtes are vars in the smallest sized cubes
+            for (HyperCube cube : infeasibleHypercubeMap.firstEntry().getValue()){
+                if (cube.getOneFixingsSize() !=ZERO){
+                    continue ;
+                } else {
+                    candidateVars.addAll ( cube.zeroFixingsMap.keySet() );
+                }
+            }
+        }*/
                
         int levelsExamined = ZERO;
         NavigableMap<Integer, List<HyperCube>> navigableMap= useReverseMOMs ? 
@@ -49,7 +62,7 @@ public  abstract class SteppedHeuristic extends BaseHeuristic{
                 
                 for (String var : cube.zeroFixingsMap.keySet()){
                     
-                    if (ZERO==levelsExamined){
+                    if (ZERO==levelsExamined  ){
                         //every free var is a candidate 
                     }else {
                         //ignore vars that are not already candidates
@@ -65,7 +78,7 @@ public  abstract class SteppedHeuristic extends BaseHeuristic{
                 }
                 for (String var : cube.oneFixingsMap.keySet()){
                     
-                    if (ZERO==levelsExamined){
+                    if (ZERO==levelsExamined  ){
                         //every free var is a candidate 
                     }else {
                         //ignore vars that are not already candidates
@@ -82,18 +95,21 @@ public  abstract class SteppedHeuristic extends BaseHeuristic{
             } 
             
             levelsExamined++;
-            int maxFreq = Collections.max(this.scoreMap_Regular.values()) ;
-            candidateVars.clear();
-            for (Map.Entry<String , Integer> scoreEntry  : scoreMap_Regular.entrySet()){
-                if (scoreEntry .getValue()==maxFreq){
-                    candidateVars.add( scoreEntry.getKey() );
+            if (scoreMap_Regular.size()!=ZERO) {
+                int maxFreq = Collections.max(this.scoreMap_Regular.values()) ;
+                candidateVars.clear();
+                for (Map.Entry<String , Integer> scoreEntry  : scoreMap_Regular.entrySet()){
+                    if (scoreEntry .getValue()==maxFreq){
+                        candidateVars.add( scoreEntry.getKey() );
+                    }
                 }
+
+                if (ONE==candidateVars.size()){
+                    //examine no more levels, we have found our candidate
+                    break;
+                } 
             }
-            
-            if (ONE==candidateVars.size()){
-                //examine no more levels, we have found our candidate
-                break;
-            } 
+           
             
             
         }//for all levels of the infeasible hypercube map

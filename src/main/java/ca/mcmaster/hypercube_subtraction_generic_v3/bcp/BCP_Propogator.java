@@ -10,8 +10,7 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ONE;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.TWO;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ZERO;  
 import ca.mcmaster.hypercube_subtraction_generic_v3.Driver; 
-import static ca.mcmaster.hypercube_subtraction_generic_v3.Driver.IS_THIS_SET_PARTITIONING;
-import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Driver.IS_THIS_SET_PARTITIONING; 
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.VariableCoefficientTuple;
 import ilog.concert.IloNumVar;
@@ -102,18 +101,20 @@ public class BCP_Propogator extends AbstractBaseBCP{
             
             for (String var: allVarsIn_BCPResultMaps){
                 double zeroSideVolumeRemoved = ZERO;
-                int zeroSideVarFixCount = ZERO;
+                double setPart_zeroSide_zeroFixCount = ZERO;
                 if (bcpResultMap_ZeroFix.containsKey(var)){
                     zeroSideVolumeRemoved = bcpResultMap_ZeroFix.get(var).volumeRemoved_BecauseOfFixings+
                                             bcpResultMap_ZeroFix.get(var).volumeRemoved_BecauseOfMismatch;
-                    zeroSideVarFixCount = bcpResultMap_ZeroFix.get(var).varFixingsFound.size();
+                    if (Driver.IS_THIS_SET_PARTITIONING) setPart_zeroSide_zeroFixCount =  bcpResultMap_ZeroFix.get(var).getNumberOfZeroFixings( );
+                     
                 }
                 double oneSideVolumeRemoved = ZERO;
-                int oneSideVarFixCount = ZERO;
+                double setPart_oneSide_zeroFixCount = ZERO; 
                 if (bcpResultMap_OneFix.containsKey(var)) {
                     oneSideVolumeRemoved=   bcpResultMap_OneFix.get(var).volumeRemoved_BecauseOfFixings+
                                             bcpResultMap_OneFix.get(var).volumeRemoved_BecauseOfMismatch;
-                    oneSideVarFixCount= bcpResultMap_OneFix.get(var).varFixingsFound.size();
+                    if (Driver.IS_THIS_SET_PARTITIONING) setPart_oneSide_zeroFixCount=  bcpResultMap_OneFix.get(var).getNumberOfZeroFixings(   );
+                     
                 }
                    
                 //note: if entry is missing from map, it is because 
@@ -128,17 +129,18 @@ public class BCP_Propogator extends AbstractBaseBCP{
                 //greedily  prefer the trigger which removes largest volume
                 double primaryMetric = Math.max(zeroSideVolumeRemoved , oneSideVolumeRemoved) ;                 
                 double secondaryMetric = Math.min(zeroSideVolumeRemoved , oneSideVolumeRemoved) ;    
-                if (ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED) {
-                    primaryMetric =  Math.max(zeroSideVarFixCount,  oneSideVarFixCount);
-                    secondaryMetric = Math.min(zeroSideVarFixCount,  oneSideVarFixCount);
-                } 
+                if (Driver.IS_THIS_SET_PARTITIONING)  {
+                    primaryMetric   =  Math.max(  setPart_zeroSide_zeroFixCount,  setPart_oneSide_zeroFixCount);        
+                    secondaryMetric =  Math.min(   setPart_zeroSide_zeroFixCount,  setPart_oneSide_zeroFixCount);   
+                    
+                }
                 
                 if (!ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP && ENABLE_TWO_SIDED_BCP_METRIC ) {
                     //when there is no trigger equivalence, we change the metric to the sum of volume removed from both sides
                     primaryMetric =  zeroSideVolumeRemoved+ oneSideVolumeRemoved ;   
-                    if (ENABLE_BCP_METRIC_NUMBER_OF_VARIABLES_FIXED){
-                        primaryMetric =   zeroSideVarFixCount+  oneSideVarFixCount;
-                    }
+                    if (Driver.IS_THIS_SET_PARTITIONING)  {
+                        primaryMetric   =     setPart_zeroSide_zeroFixCount+ setPart_oneSide_zeroFixCount;
+                    } 
                     secondaryMetric = ZERO; //unused
                 }
                 
@@ -284,6 +286,5 @@ public class BCP_Propogator extends AbstractBaseBCP{
         
     }
     
-    
-  
+   
 }
