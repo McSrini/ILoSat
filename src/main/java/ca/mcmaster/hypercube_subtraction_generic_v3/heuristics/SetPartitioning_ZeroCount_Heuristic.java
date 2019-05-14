@@ -21,8 +21,8 @@ import java.util.Set;
  
  * 
  */
-public class SetPartitioning_ZeroCount_Heuristic extends BaseHeuristic{
- 
+public class SetPartitioning_ZeroCount_Heuristic extends BaseHeuristic{ 
+   
     public List<String> getBranchingVariableSuggestions() {
         
         List<String> candidateVars = new ArrayList<String> ();
@@ -34,9 +34,9 @@ public class SetPartitioning_ZeroCount_Heuristic extends BaseHeuristic{
                 Set<String> vars = hcube.zeroFixingsMap.keySet();
                 int size = vars.size();
                 
-                for (String var: vars){
+                for (String var: vars){                    
                     Integer currentScore = this.scoreMap_Regular.get(var);
-                    if (null==currentScore){
+                    if (null==currentScore){  
                         this.scoreMap_Regular.put(var, size -ONE);
                     }else {
                         this.scoreMap_Regular.put(var, currentScore + size -ONE);
@@ -53,7 +53,7 @@ public class SetPartitioning_ZeroCount_Heuristic extends BaseHeuristic{
                 candidateVars.add(scoreEntry.getKey()) ;
             }
         }
-        
+                
         return candidateVars;        
         
     }

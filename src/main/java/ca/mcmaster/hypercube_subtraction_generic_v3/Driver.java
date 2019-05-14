@@ -150,7 +150,7 @@ public class Driver {
                 collectedHypercubeMap .absorb();
             }
             
-            //collectedHypercubeMap.printCollectedHypercubes(true);
+            collectedHypercubeMap.printCollectedHypercubes(true);
             
             
             //this call is needed to remove cubes marked as merged or absorbed
@@ -338,8 +338,10 @@ public class Driver {
             if (collector.collectedHypercubeMap.size()>ZERO  ){
                 int numCollected = getNumHypercubes(collector.collectedHypercubeMap);
                 //System.out.println(" numCollected " + numCollected);
-                if (MAX_HYPERCUBES_PER_CONSTRAINT> numCollected){
+                if (MAX_HYPERCUBES_PER_CONSTRAINT>= numCollected){
                     isMIPInfeasible = collectedHypercubeMap .addCubesAndCheckInfeasibility(collector.collectedHypercubeMap );
+                }else {
+                    logger.info ("Excluding constarint from hypercube collection "+ lbc.name) ;
                 }
             } 
             if (isMIPInfeasible) break;
@@ -363,7 +365,8 @@ public class Driver {
         
         logger.info("PROGRAM VERSION "+ VERSION) ; 
         logger.info("MIP_FILENAME "+ MIP_FILENAME) ; 
-        logger.info("MIP_EMPHASIS "+ MIP_EMPHASIS) ; 
+        logger.info("MIP_EMPHASIS  "+ MIP_EMPHASIS  ) ;  
+        
         
         logger.info("MAX_THREADS "+ MAX_THREADS) ; 
         logger.info("FILE_STRATEGY "+ FILE_STRATEGY) ; 

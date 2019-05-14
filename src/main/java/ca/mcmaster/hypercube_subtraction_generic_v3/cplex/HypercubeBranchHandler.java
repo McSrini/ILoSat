@@ -202,6 +202,27 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
             }
     }
     
+    
+    //get var fixings relevant to this cube
+    private TreeMap<String, Boolean> getRelevantVarFixings (HyperCube cube,  TreeMap<String, Boolean> thisNodesVarFixings) {
+        
+        TreeMap<String, Boolean> result = new TreeMap<String, Boolean> ();
+        
+        for (String var :cube.zeroFixingsMap.keySet()){
+            Boolean fixing= thisNodesVarFixings.get(var) ;
+            if (null!=fixing){
+                result.put (var, fixing);
+            }
+        }
+        for (String var :cube.oneFixingsMap.keySet()){
+            Boolean fixing= thisNodesVarFixings.get(var) ;
+            if (null!=fixing){
+                result.put (var, fixing);
+            }
+        }
+        
+        return result;
+    }
   
     /**
      * 
@@ -225,7 +246,7 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                 //keep track of how much the key changes.  
                 int decreaseInSize = ZERO;
                 
-                for (Entry<String, Boolean>  fixing :thisNodesVarFixings.entrySet()){
+                for (Entry<String, Boolean>  fixing :  getRelevantVarFixings(cube, thisNodesVarFixings).entrySet()    ){
                     filteredCube = filteredCube.filter( fixing.getKey(),   fixing.getValue()  );
                     //System.out.println("key is " + fixing.getKey() + " and val is "+ fixing.getValue()) ;
                     if (null ==filteredCube) {
@@ -391,6 +412,29 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
             excluded.addAll( cube.zeroFixingsMap.keySet());
         }   
          
+        return resultSet;
+    }*/
+    
+    //return  variables in all0 cubes of smallest size
+    /*private Set<String>getAllVariables_InSmallestAllZeroHypercubes (TreeMap<Integer, List<HyperCube>>  filterResult){
+        //our return value
+        Set<String> resultSet = new HashSet<String> ();  
+        
+        boolean isAllZeroCubeFound = false;
+        
+        for (Entry <Integer, List<HyperCube>>  entry :filterResult.entrySet()){
+            for (HyperCube cube :  entry.getValue()){
+                
+                if (cube.oneFixingsMap.isEmpty()) {
+                    isAllZeroCubeFound= true;
+                    resultSet.addAll(cube.zeroFixingsMap.keySet());
+                }
+            }
+            
+            //do not investigate next level if isAllZeroCubeFound at this level
+            if (isAllZeroCubeFound) break;
+        }
+        
         return resultSet;
     }*/
     

@@ -27,13 +27,14 @@ public class Parameters {
     //public static final String MIP_FILENAME = "supportcase22.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\supportcase22.mps";
     
-    
+    //public static final String MIP_FILENAME = "seymour-disj-10.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\seymour-disj-10.pre.lp";
     
     //public static final String MIP_FILENAME = "presolved_supportcase10.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\presolved_supportcase10.mps";
     
-    //public static final String MIP_FILENAME = "opm2-z12-s8.mps";
-    //public static final String MIP_FILENAME = "F:\\temporary files here\\opm2-z12-s8.mps";
+    //public static final String MIP_FILENAME = "opm2-z12-s8.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\opm2-z12-s8.pre.lp";
     
     //public static final String MIP_FILENAME = "opm2-z12-s7.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\opm2-z12-s7.mps";
@@ -41,7 +42,7 @@ public class Parameters {
     //public static final String MIP_FILENAME = "sts405.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\sts405.mps";
     
-    //public static final String MIP_FILENAME = "supportcase3.mps";
+    public static final String MIP_FILENAME = "supportcase3.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\supportcase3.mps";
     
     //public static final String MIP_FILENAME = "hanoi5.mps";
@@ -52,7 +53,7 @@ public class Parameters {
     //public static final String MIP_FILENAME = "F:\\temporary files here\\f2000.mps";
     
     //set partitioning    
-    public static final String MIP_FILENAME = "neos-807456.mps";
+    //public static final String MIP_FILENAME = "neos-807456.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\neos-807456.mps"; 
     //public static final String MIP_FILENAME = "ds.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\ds.mps";
@@ -134,6 +135,8 @@ public class Parameters {
     //public static final String MIP_FILENAME = "F:\\temporary files here\\DIMACS_CNF\\cnc\\lp\\dated-5-19-u.lp";
     //public static final String MIP_FILENAME = "gss-24-s100.lp";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\DIMACS_CNF\\cnc\\lp\\gss-24-s100.lp";
+    //public static final String MIP_FILENAME = "gss-26-s100.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\DIMACS_CNF\\cnc\\lp\\gss-26-s100.lp";
     
     //dated-5-19-u , sortnet-8-ipc5-h19
     
@@ -161,10 +164,10 @@ public class Parameters {
     //public static final String MIP_FILENAME = "F:\\temporary files here\\knapsackSmall.lp";
      
     
-    public static final long PERF_VARIABILITY_RANDOM_SEED = 0;
+    public static final long PERF_VARIABILITY_RANDOM_SEED = 1;
     public static final java.util.Random  PERF_VARIABILITY_RANDOM_GENERATOR = new  java.util.Random  (PERF_VARIABILITY_RANDOM_SEED);
   
-    public static final boolean  USE_PURE_CPLEX = false;
+    public static final boolean  USE_PURE_CPLEX = true;
    
     //collect the best vertex, and all adjacent vertices, and vertices adajacent to adjacent vertices, and so on
     //set to 0 to collect only the best vertex, and to a large numberto collect all
@@ -172,7 +175,7 @@ public class Parameters {
     //if too many hypercubes for a constraint, discard them all
     public static final int MAX_HYPERCUBES_PER_CONSTRAINT= BILLION;
     
-    public static final boolean MERGE_COLLECTED_HYPERCUBES = false;
+    public static final boolean MERGE_COLLECTED_HYPERCUBES = true;
     public static final boolean ABSORB_COLLECTED_HYPERCUBES = false;
     
     public static final BRANCHING_HEURISTIC_ENUM HEURISTIC_TO_USE = BRANCHING_HEURISTIC_ENUM.STEPPED_WEIGHT ;
@@ -183,20 +186,20 @@ public class Parameters {
     //shuffle constraint during creation (for perf variablity) before arranging by desired order
     public static final boolean SHUFFLE_THE_CONSTRAINTS = false;
     //do you want to sort vars in a given constraint ? 
-    public static final boolean SORT_THE_CONSTRAINTS =false;
+    public static final boolean SORT_THE_CONSTRAINTS =true;
     //check duplicates?
     public static final boolean CHECK_FOR_DUPLICATES = true;
     //use this parameter to do multiple rounds of collection
     public static final int NUMBER_OF_ADDITIONAL_HYPERCUBE_COLLECTION_ROUNDS = ZERO;
     
-    public static final boolean CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL =  true  ;
+    public static final boolean CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL =  false  ;
     public static final boolean ENABLE_TWO_SIDED_BCP_METRIC = false  ;
     
     public static final BCP_LEVEL_ENUM USE_BCP_LEVEL = BCP_LEVEL_ENUM.ALL_VARS     ;
     public static final boolean EXCLUDE_CPLEX_LP_INTEGRAL_VARS =  true     ;
     public static final boolean USE_ONLY_MAX_PSEDUDO_COST_VARS = false;
      
-    public static final boolean ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP = false  ;
+    public static final boolean ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP = true  ;
     
     public static final boolean FORCE_STATIC_VARIABLE_PRIORITIES= false;
     public static final boolean DETECT_STATIC_VARIABLE_PRIORITIES= false;

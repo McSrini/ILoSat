@@ -130,7 +130,7 @@ public class BCP_Propogator extends AbstractBaseBCP{
                 double primaryMetric = Math.max(zeroSideVolumeRemoved , oneSideVolumeRemoved) ;                 
                 double secondaryMetric = Math.min(zeroSideVolumeRemoved , oneSideVolumeRemoved) ;    
                 if (Driver.IS_THIS_SET_PARTITIONING)  {
-                    primaryMetric   =  Math.max(  setPart_zeroSide_zeroFixCount,  setPart_oneSide_zeroFixCount);        
+                    primaryMetric   =  Math.max(  setPart_zeroSide_zeroFixCount,  setPart_oneSide_zeroFixCount);       
                     secondaryMetric =  Math.min(   setPart_zeroSide_zeroFixCount,  setPart_oneSide_zeroFixCount);   
                     
                 }

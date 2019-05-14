@@ -16,7 +16,7 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.DISAB
 import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.DISABLE_PROBING;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.FAST_CPLEX_BRANCH_STRATEGY;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.FILE_STRATEGY;
-import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.MAX_THREADS;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.MAX_THREADS; 
 import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.MIP_EMPHASIS;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.CplexParameters.NODE_LOG_INTERVAL;
 import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
@@ -64,7 +64,7 @@ public class StaticCplexSolver extends BaseCplexSolver{
         
         if (CPLEX_RANDOM_SEED>=ZERO) cplex.setParam(IloCplex.Param.RandomSeed,  CPLEX_RANDOM_SEED);
         
-        cplex.setParam(IloCplex.Param.Emphasis.MIP,  MIP_EMPHASIS);
+        cplex.setParam(IloCplex.Param.Emphasis.MIP,   MIP_EMPHASIS );
         cplex.setParam( IloCplex.Param.Threads, MAX_THREADS);
         cplex.setParam(IloCplex.Param.MIP.Strategy.File,  FILE_STRATEGY);   
         cplex.setParam(IloCplex.Param.MIP.Interval, NODE_LOG_INTERVAL);

@@ -12,6 +12,7 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_Propogator; 
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM.SET_PARTITIONING_HEURISTIC;
 import ilog.concert.IloException;
 import ilog.concert.IloLPMatrix;
 import ilog.concert.IloNumVar;
@@ -48,10 +49,11 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
         
         if (CPLEX_RANDOM_SEED>=ZERO) cplex.setParam(IloCplex.Param.RandomSeed,  CPLEX_RANDOM_SEED);
         
-        cplex.setParam(IloCplex.Param.Emphasis.MIP,  MIP_EMPHASIS);
+       
         cplex.setParam( IloCplex.Param.Threads, MAX_THREADS);
         cplex.setParam(IloCplex.Param.MIP.Strategy.File,  FILE_STRATEGY);   
         cplex.setParam(IloCplex.Param.MIP.Interval, NODE_LOG_INTERVAL);
+        cplex.setParam(IloCplex.Param.Emphasis.MIP,   MIP_EMPHASIS );
          
         if (DISABLE_HEURISTICS) cplex.setParam( IloCplex.Param.MIP.Strategy.HeuristicFreq , -ONE);
         if (DISABLE_PROBING) cplex.setParam(IloCplex.Param.MIP.Strategy.Probe, -ONE);
@@ -80,10 +82,13 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
             if (isHaltFilePresent()) break;
             
             cplex.clearCallbacks();
-            cplex.use( this.branchingCallback);
+            cplex.use( this.branchingCallback);            
             cplex.setParam( IloCplex.Param.TimeLimit,  SIXTY*SIXTY);
             //switch to the correct number of threads
             cplex.setParam( IloCplex.Param.Threads, MAX_THREADS);
+           
+            
+            
             cplex.solve();
 
             //print stats
@@ -108,6 +113,8 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
              
             cplex.clearCallbacks();
             cplex.setParam(IloCplex.IntParam.VarSel,   IloCplex.VariableSelect.DefaultVarSel);
+            
+           
              
             cplex.use(new EmptyBranchHandler());
             cplex.setParam( IloCplex.Param.TimeLimit,   SIXTY*SIXTY);

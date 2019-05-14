@@ -52,7 +52,7 @@ public class BCP_Result {
         }
         return count;
     }
-    
+         
     /*public double getVolumeRemovedMetric_For_SetPartitioning (boolean isZeroSide){
         double weight= ZERO;
         
@@ -116,8 +116,12 @@ public class BCP_Result {
             if (!wasCubeEliminationAlreadyNoted){
                 double cubeSize = cubeInWhichFixingWasFound.zeroFixingsMap.size()+ cubeInWhichFixingWasFound.oneFixingsMap.size();
                 
-                
-                this.volumeRemoved_BecauseOfFixings+=   DOUBLE_ONE/Math.pow(TWO,cubeSize) ;
+                if (Driver.DOES_MIP_HAVE_TWO_VARIABLES_IN_EVERY_CONSTRAINT) {
+                    this.volumeRemoved_BecauseOfFixings ++ ; 
+                }else {
+                    this.volumeRemoved_BecauseOfFixings+=   DOUBLE_ONE/Math.pow(TWO,cubeSize) ;
+                }
+               
                 
                  
             }
@@ -155,7 +159,11 @@ public class BCP_Result {
                 //update volume and best Obj
                 double cubeSize = otherCube.zeroFixingsMap.size()+ otherCube.oneFixingsMap.size();
                 
-                this.volumeRemoved_BecauseOfFixings+= DOUBLE_ONE/Math.pow(TWO,cubeSize)              ;   
+                if (Driver.DOES_MIP_HAVE_TWO_VARIABLES_IN_EVERY_CONSTRAINT) {
+                    this.volumeRemoved_BecauseOfFixings ++ ; 
+                }else {
+                    this.volumeRemoved_BecauseOfFixings+= DOUBLE_ONE/Math.pow(TWO,cubeSize)              ;   
+                }
                 
             }
         }

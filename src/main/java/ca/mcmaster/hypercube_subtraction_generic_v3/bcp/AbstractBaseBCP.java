@@ -287,7 +287,13 @@ public abstract class AbstractBaseBCP {
                 if (isEliminatedByMismatch (reaminingCube, finalResult.varFixingsFound) ){
                      
                     double cubeSize = reaminingCube.zeroFixingsMap.size()+ reaminingCube.oneFixingsMap.size();
-                    finalResult.volumeRemoved_BecauseOfMismatch+= DOUBLE_ONE/Math.pow(TWO,cubeSize);
+                    
+                    if (Driver.DOES_MIP_HAVE_TWO_VARIABLES_IN_EVERY_CONSTRAINT){
+                        finalResult.volumeRemoved_BecauseOfMismatch++;
+                    }else {
+                        finalResult.volumeRemoved_BecauseOfMismatch+= DOUBLE_ONE/Math.pow(TWO,cubeSize);
+                    }
+                    
 
                                         
                 } else  if (THREE==thisLevel && CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL ) {

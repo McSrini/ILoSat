@@ -12,14 +12,13 @@ import ilog.cplex.IloCplex;
  * @author tamvadss
  */
 public class CplexParameters {
-    
-        
-    public static final int MIP_EMPHASIS=   0; 
+            
+    public static final int MIP_EMPHASIS =   0; 
     public static final int MAX_THREADS= 32;  
     public static final int FILE_STRATEGY= 3;  
     
     //leave at -1 to take default
-    public static final int CPLEX_RANDOM_SEED=  -1 ;
+    public static final int CPLEX_RANDOM_SEED=  5 ;
     
     //leave at 0 unless debugging
     public static final int NODE_LOG_INTERVAL = 0; 
@@ -40,7 +39,7 @@ public class CplexParameters {
     //use if default cplex is very slow to branch some MIPs
     //public static final boolean USE_BARRIER_AND_REDUCED_COSTS = false;
     
-    public static final int RAMP_UP_DURATION_HOURS= 1;  
+    public static final int RAMP_UP_DURATION_HOURS= 4;  
     public static final int SOLUTION_DURATION_HOURS= 20*24 ;  //20 DAYS MAXIMUM
     
 }
