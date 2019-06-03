@@ -88,8 +88,28 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
             cplex.setParam( IloCplex.Param.Threads, MAX_THREADS);
            
             
+            //full strong
+            //cplex.setParam(IloCplex.Param.MIP.Limits.StrongCand  ,BILLION);
+            //cplex.setParam(IloCplex.Param.MIP.Strategy.VariableSelect  , THREE );
+            
+            if (HEURISTIC_TO_USE.equals( SET_PARTITIONING_HEURISTIC)) {
+                //ALWAYS pick down branch node
+                //cplex.setParam(IloCplex.Param.MIP.Strategy.Branch, -ONE );
+                //use single thread ramp up so down child is always picked
+                //cplex.setParam( IloCplex.Param.Threads, ONE);
+                
+            }
             
             cplex.solve();
+            
+            if (HEURISTIC_TO_USE.equals( SET_PARTITIONING_HEURISTIC)) {
+                //RESET BRANCH DIR
+                //cplex.setParam(IloCplex.Param.MIP.Strategy.Branch, ZERO );
+            }
+            
+            //undo full strong            
+            //cplex.setParam(IloCplex.Param.MIP.Limits.StrongCand  ,TEN);
+            //cplex.setParam(IloCplex.Param.MIP.Strategy.VariableSelect  , ZERO );
 
             //print stats
             StaticticsCallback stats = new StaticticsCallback();
@@ -113,13 +133,17 @@ public class TraditionalCplexSolver extends BaseCplexSolver{
              
             cplex.clearCallbacks();
             cplex.setParam(IloCplex.IntParam.VarSel,   IloCplex.VariableSelect.DefaultVarSel);
-            
            
-             
+            
             cplex.use(new EmptyBranchHandler());
+           
+            
             cplex.setParam( IloCplex.Param.TimeLimit,   SIXTY*SIXTY);
             //switch to the correct number of threads
             cplex.setParam( IloCplex.Param.Threads, MAX_THREADS);
+            
+            
+            
             cplex.solve();
 
             //print stats

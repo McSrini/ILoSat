@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP;
+import java.util.HashMap;
 
 /**
  *
@@ -151,7 +152,17 @@ public abstract class AbstractBaseBCP {
              
         BCP_Result cumulativeResult = new BCP_Result ();
         
-        BCP_Result iterationResult = getUncascadedVarFixings( inputVariableFixings, remainingCubesAtThisLevel, thisLevel);
+        //convert inputVariableFixings into map
+        Map  <String, Boolean>   inputVariableFixingsMap = new HashMap <> ();
+        for (VariableCoefficientTuple tuple: inputVariableFixings){
+            if (tuple.coeff > ZERO){
+                inputVariableFixingsMap.put (tuple.varName,true) ;
+            }else {
+                inputVariableFixingsMap.put (tuple.varName,false) ; 
+            }
+        }
+        
+        BCP_Result iterationResult = getUncascadedVarFixings( inputVariableFixingsMap, remainingCubesAtThisLevel, thisLevel);
         while (! iterationResult.isInfeasibilityDetected && iterationResult.varFixingsFound.size()!=ZERO){            
             
             //check if inputVariableFixings include any conflicting tuple
@@ -165,7 +176,7 @@ public abstract class AbstractBaseBCP {
                 cumulativeResult .merge ( iterationResult) ;
 
                 //another iteration
-                iterationResult = getUncascadedVarFixings( inputVariableFixings, remainingCubesAtThisLevel, thisLevel);            
+                iterationResult = getUncascadedVarFixings( inputVariableFixingsMap, remainingCubesAtThisLevel, thisLevel);            
                 
             } //end if else           
         }//end while
@@ -179,7 +190,7 @@ public abstract class AbstractBaseBCP {
     
      
     //only the uncascaded var fixings at a given level are implemented differntly fo each kind of BCP propogator
-    protected abstract BCP_Result getUncascadedVarFixings (List<VariableCoefficientTuple> inputVarFixings, List<HyperCube> remainingCubesAtThisLevel , 
+    protected abstract BCP_Result getUncascadedVarFixings (Map<String, Boolean>   inputVarFixings, List<HyperCube> remainingCubesAtThisLevel , 
                                                int thisLevel) ;
     
      

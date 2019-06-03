@@ -33,7 +33,7 @@ public   class StaticticsCallback extends IloCplex.NodeCallback{
         numberOFLeafs =getNremainingNodes64();
         numberOFNodesProcessed=getNnodes64();
         bestKnownSOlution = getIncumbentObjValue();
-        bestKnownBound=getBestObjValue();
+        bestKnownBound=getBestObjValue();     
         abort();
     }
    

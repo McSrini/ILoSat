@@ -30,6 +30,7 @@ import ca.mcmaster.hypercube_subtraction_generic_v3.common.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.*;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.heuristics.BRANCHING_HEURISTIC_ENUM.*;
 import static java.lang.System.exit;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,9 +106,14 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
             
             // this.printInfeasibleHyperCubeMap(nodeData.infeasibleHypercubesMap );
             
+            
+             
+            
             //for these   fixings, create a local infeasible hypercube map
             TreeMap<Integer, List<HyperCube>>  filterResult  = 
                     getFilteredHypercubes(nodeData.infeasibleHypercubesMap, thisNodesVarFixings);
+            
+             
                       
             //this.printInfeasibleHyperCubeMap(filterResult.filteredHypercubes);
             

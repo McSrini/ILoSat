@@ -9,6 +9,7 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -260,6 +261,7 @@ public class HyperCube {
     //if all vars in cube fixed at 0 except 1 -> leftover var fixed to 1     
     //all other cases  ->  no fixing
     //
+    /*
     public  HyperCubeVariableFixingResult getResultOfVarFixings_SetPartition (List<VariableCoefficientTuple> inputVarFixings  ){
          
         HyperCubeVariableFixingResult result = new HyperCubeVariableFixingResult ();
@@ -314,6 +316,8 @@ public class HyperCube {
         return result;
     }
     
+    */
+    
     //get var fixing, if any
     //if even a single var mismatches the cubes fixings, then there is no fixing  
     //if more than 1 var is left unmatched, there is no fixing  
@@ -322,22 +326,26 @@ public class HyperCube {
     //
     //note that if a fixing is resulting in infeasibility, we should branch on this variable
     //
-    public  HyperCubeVariableFixingResult getResultOfVarFixings (List<VariableCoefficientTuple> inputVarFixings  ){
-        
+    public  HyperCubeVariableFixingResult getResultOfVarFixings ( Map<String, Boolean> inputVarFixings  ){
+       
         HyperCubeVariableFixingResult result = new HyperCubeVariableFixingResult ();
         
         List<String> zeroFixedVarsInCube_Copy = new ArrayList<>();
         zeroFixedVarsInCube_Copy.addAll(this.zeroFixingsMap.keySet() );
         List<String> oneFixedVarsInCube_Copy  = new ArrayList<>();
         oneFixedVarsInCube_Copy.addAll( this.oneFixingsMap.keySet());
+        
+        Map<String, Boolean>  relevantInputVarFixings = 
+                getRelevantInputVarFixings(inputVarFixings, zeroFixedVarsInCube_Copy, oneFixedVarsInCube_Copy) ;
          
-        for (VariableCoefficientTuple inputFixing: inputVarFixings ){
-            if (Math.round(inputFixing.coeff)>ZERO){
+        for (Entry <String, Boolean>    inputFixing: relevantInputVarFixings.entrySet()  ){
+            
+            if ( inputFixing.getValue() ){
                 //tuple is 1 fixed
                 
-                oneFixedVarsInCube_Copy.remove(inputFixing.varName) ;
+                oneFixedVarsInCube_Copy.remove(inputFixing.getKey()) ;
                 
-                if (zeroFixedVarsInCube_Copy.contains(inputFixing.varName )){
+                if (zeroFixedVarsInCube_Copy.contains(inputFixing.getKey() )){
                     //mismatch
                     result.isMismatch=true;
                     break;
@@ -345,8 +353,8 @@ public class HyperCube {
                 
             }else {
                 //tuple is 0 fixed
-                zeroFixedVarsInCube_Copy.remove( inputFixing.varName);
-                if (oneFixedVarsInCube_Copy.contains(inputFixing.varName )){
+                zeroFixedVarsInCube_Copy.remove( inputFixing.getKey());
+                if (oneFixedVarsInCube_Copy.contains(inputFixing.getKey() )){
                     //mismatch
                     result.isMismatch=true;
                     break;
@@ -360,11 +368,11 @@ public class HyperCube {
                 result.isInfeasibilityDetected= true;
             }else if (size==ONE){                
                 if (zeroFixedVarsInCube_Copy.size()==ONE){                     
-                    result.fixingList= new ArrayList<VariableCoefficientTuple>();
-                    result.fixingList.add(new VariableCoefficientTuple(zeroFixedVarsInCube_Copy.get(ZERO), ONE));
+                    result.fixingMap = new TreeMap<String, Boolean> ();
+                    result.fixingMap.put( zeroFixedVarsInCube_Copy.get(ZERO), true);
                 }else {
-                    result.fixingList= new   ArrayList<VariableCoefficientTuple>();
-                    result.fixingList.add(new VariableCoefficientTuple(oneFixedVarsInCube_Copy.get(ZERO), ZERO));
+                     result.fixingMap = new TreeMap<String, Boolean> ();
+                    result.fixingMap.put(oneFixedVarsInCube_Copy.get(ZERO), false);
                 }
             }else {
                 //no fixing results, do nothing
@@ -391,6 +399,33 @@ public class HyperCube {
          
         //System.out.println(result) ;
         return result ;
+    }
+    
+    //get subset of map, without doing sequential search on keys
+    private  Map<String, Boolean>       getRelevantInputVarFixings(
+            Map<String, Boolean> inputVarFixings, 
+            List<String> zeroFixedVarsInCube_Copy, 
+            List<String> oneFixedVarsInCube_Copy) {
+        
+        Map<String, Boolean>  result = new HashMap<String, Boolean> ();
+        
+        for (String str : zeroFixedVarsInCube_Copy){
+            Boolean fixing = inputVarFixings.get(str);
+            if (null!=fixing) {
+                result.put (str,fixing );
+            }
+        }
+         
+        for (String str :  oneFixedVarsInCube_Copy){
+            Boolean fixing = inputVarFixings.get(str);
+            if (null!=fixing) {
+                result.put (str,fixing );
+            }
+        }
+         
+        return result;
+        
+        
     }
 }
 

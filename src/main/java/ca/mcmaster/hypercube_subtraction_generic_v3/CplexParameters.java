@@ -4,7 +4,8 @@
  * and open the template in the editor.
  */
 package ca.mcmaster.hypercube_subtraction_generic_v3;
-
+ 
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ZERO;
 import ilog.cplex.IloCplex;
 
 /**
@@ -18,12 +19,11 @@ public class CplexParameters {
     public static final int FILE_STRATEGY= 3;  
     
     //leave at -1 to take default
-    public static final int CPLEX_RANDOM_SEED=  5 ;
+    public static final int CPLEX_RANDOM_SEED=  -1 ;
     
     //leave at 0 unless debugging
     public static final int NODE_LOG_INTERVAL = 0; 
-    
-    
+     
     
     public static final boolean DISABLE_HEURISTICS= true; 
     public static final boolean DISABLE_PROBING= false; 
@@ -33,13 +33,12 @@ public class CplexParameters {
     
     //since we overrule cplex anyway during ramp up
     public static final int  FAST_CPLEX_BRANCH_STRATEGY = IloCplex.VariableSelect.MinInfeas;
-    
-    
+     
     
     //use if default cplex is very slow to branch some MIPs
     //public static final boolean USE_BARRIER_AND_REDUCED_COSTS = false;
     
-    public static final int RAMP_UP_DURATION_HOURS= 4;  
+    public static final int RAMP_UP_DURATION_HOURS= 2;  
     public static final int SOLUTION_DURATION_HOURS= 20*24 ;  //20 DAYS MAXIMUM
     
 }

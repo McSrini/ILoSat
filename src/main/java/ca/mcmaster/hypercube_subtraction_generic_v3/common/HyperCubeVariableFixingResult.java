@@ -6,6 +6,9 @@
 package ca.mcmaster.hypercube_subtraction_generic_v3.common;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  *
@@ -23,14 +26,16 @@ public class HyperCubeVariableFixingResult {
     
     //non-null if any fixing actually results
     //set partitioning constraints can result in multiple fixings
-    public List<VariableCoefficientTuple> fixingList=null;
+    //
+    //false indicates 0 fixing
+    public TreeMap<String, Boolean> fixingMap=null;
     
     public void printMe (){
         System.out.println("isInfeasibilityDetected "+isInfeasibilityDetected);
         System.out.println("isMismatch "+isMismatch);
-        if (fixingList!=null) {
-            for (VariableCoefficientTuple tuple: fixingList){
-               System.out.println("tuple  "+tuple.varName+ " "+ tuple.coeff);
+        if (fixingMap!=null) {
+            for (Entry <String ,Boolean> entry: fixingMap.entrySet()){
+               System.out.println("tuple  "+entry.getKey()+ " "+ entry.getValue());
             }
         }
     }

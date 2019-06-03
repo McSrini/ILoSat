@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -41,7 +42,6 @@ public class BCP_Result {
     //this flag is used to climb up levels, starting again from level 2, if fixings found at higher levels
     public boolean isReClimbRequired = false;
     
-    
     public int getNumberOfZeroFixings  ( ) {
         int count = ZERO ;
         
@@ -52,25 +52,7 @@ public class BCP_Result {
         }
         return count;
     }
-         
-    /*public double getVolumeRemovedMetric_For_SetPartitioning (boolean isZeroSide){
-        double weight= ZERO;
-        
-        for (Entry <Integer,List<HyperCube>> entry: cubesEliminatedByFixing.entrySet()){
-            
-            int size = entry.getKey();
-            
-            for (HyperCube hcube : entry.getValue()){
-                if ( isZeroSide &&   hcube.getZeroFixingsSize()==ZERO ) continue;
-                if ( !isZeroSide &&   hcube.getZeroFixingsSize()!=ZERO ) continue;
-                weight+=    ( Math.pow(TWO, -size)  );
-                 
-            }
-           
-            //System.out.println("for index "+ entry.getKey() +" count is = " + entry.getValue().size());
-        }
-        return weight;
-    }  */
+  
     
     public boolean addFixingS (List<VariableCoefficientTuple>  varFixingFound_List, HyperCube cubeInWhichFixingsWereFound, 
                               int thisLevel){

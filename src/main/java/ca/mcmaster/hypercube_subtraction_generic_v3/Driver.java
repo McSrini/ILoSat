@@ -280,9 +280,17 @@ public class Driver {
                     System.out.println("skip hypercube collection for capacity constraint "+lbc.name);
                     continue;
                 }
+                
             }
             
-            if (MIP_FILENAME .contains( "opm2-z12-s7.mps") || MIP_FILENAME .contains( "opm2-z12-s8") ){
+            if (MIP_FILENAME .contains( "rail03.mps")   ){
+                if (lbc.getSize() >TWO) {
+                    System.out.println("skip hypercube collection for large constraint "+lbc.name);
+                    continue;
+                }
+            }
+            
+            if (MIP_FILENAME .contains( "opm2-z12-s7") || MIP_FILENAME .contains( "opm2-z12-s8") ){
                 //ignore capacity constraints for cube collection
                 List<String> capacityCosntraints = new ArrayList<String>();
                 capacityCosntraints.add("c1");
@@ -319,6 +327,15 @@ public class Driver {
                 if ( lbc.name.contains("CAP")){
                     System.out.println("skip hypercube collection for capacity constraint "+lbc.name);
                     continue;
+                }
+            }
+            
+            if (MIP_FILENAME .contains( "wnq")){
+                if ( lbc.name.contains("c6567") || lbc.name.contains("c6568") ){
+                    if (lbc.name.length() == FIVE+TWO ){
+                        System.out.println("skip hypercube collection for capacity constraint "+lbc.name);
+                        continue;
+                    }                    
                 }
             }
             
@@ -426,6 +443,9 @@ public class Driver {
         
         logger.info ("CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL  "+  CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL  );
         
+        logger.info (" MAX_VARIABLES_PER_CONSTRAINT " + MAX_VARIABLES_PER_CONSTRAINT); 
+        
+                
         logger.info (" ENABLE_TWO_SIDED_BCP_METRIC " + ENABLE_TWO_SIDED_BCP_METRIC); 
                         
     }    

@@ -9,6 +9,7 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
 import ca.mcmaster.hypercube_subtraction_generic_v3.Parameters;  
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.HEURISTIC_TO_USE;
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.MAX_VARIABLES_PER_CONSTRAINT;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.NO_BCP;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.LowerBoundConstraint;
 import ilog.concert.IloException;
@@ -112,7 +113,7 @@ public class MIPReader {
             String thisConstraintname = ranges[index].getName();
             //System.out.println("Constarint is : " + thisConstraintname + " lenght is " +ind[index].length);//k
             
-            
+            if (ind[index].length > MAX_VARIABLES_PER_CONSTRAINT) continue;
                        
             boolean isUpperBound = Math.abs(ub[index])< BILLION ;
             boolean isLowerBound = Math.abs(lb[index])<BILLION ;

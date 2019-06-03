@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.ENABLE_TWO_SIDED_BCP_METRIC;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -65,7 +66,7 @@ public class BCP_Propogator extends AbstractBaseBCP{
         
         VariableCoefficientTuple trigger =  getNextTrigger (); 
         
-        //System.out.println( "getNumTriggersRemaining start" + getNumTriggersRemaining());
+        //System.out.println(LocalDateTime.now() + " getNumTriggersRemaining start" + getNumTriggersRemaining());
          
         int iterationCount = ZERO;
         
@@ -85,7 +86,7 @@ public class BCP_Propogator extends AbstractBaseBCP{
             trigger =  getNextTrigger ();
         }
          
-        //System.out.println( "getNumTriggersRemaining end " + getNumTriggersRemaining() + " itercount "+ iterationCount);
+        //System.out.println(LocalDateTime.now() + " getNumTriggersRemaining end " + getNumTriggersRemaining() + " itercount "+ iterationCount);
         
         isInfeasibleTriggerFoundDuringBCP = isInfeasible; //no need for extra variable
         
@@ -101,7 +102,7 @@ public class BCP_Propogator extends AbstractBaseBCP{
             
             for (String var: allVarsIn_BCPResultMaps){
                 double zeroSideVolumeRemoved = ZERO;
-                double setPart_zeroSide_zeroFixCount = ZERO;
+                double setPart_zeroSide_zeroFixCount =ZERO ;
                 if (bcpResultMap_ZeroFix.containsKey(var)){
                     zeroSideVolumeRemoved = bcpResultMap_ZeroFix.get(var).volumeRemoved_BecauseOfFixings+
                                             bcpResultMap_ZeroFix.get(var).volumeRemoved_BecauseOfMismatch;
@@ -109,11 +110,11 @@ public class BCP_Propogator extends AbstractBaseBCP{
                      
                 }
                 double oneSideVolumeRemoved = ZERO;
-                double setPart_oneSide_zeroFixCount = ZERO; 
+                double setPart_oneSide_zeroFixCount =ZERO; 
                 if (bcpResultMap_OneFix.containsKey(var)) {
                     oneSideVolumeRemoved=   bcpResultMap_OneFix.get(var).volumeRemoved_BecauseOfFixings+
                                             bcpResultMap_OneFix.get(var).volumeRemoved_BecauseOfMismatch;
-                    if (Driver.IS_THIS_SET_PARTITIONING) setPart_oneSide_zeroFixCount=  bcpResultMap_OneFix.get(var).getNumberOfZeroFixings(   );
+                    if (Driver.IS_THIS_SET_PARTITIONING) setPart_oneSide_zeroFixCount=  bcpResultMap_OneFix.get(var).getNumberOfZeroFixings(    );
                      
                 }
                    
@@ -139,7 +140,7 @@ public class BCP_Propogator extends AbstractBaseBCP{
                     //when there is no trigger equivalence, we change the metric to the sum of volume removed from both sides
                     primaryMetric =  zeroSideVolumeRemoved+ oneSideVolumeRemoved ;   
                     if (Driver.IS_THIS_SET_PARTITIONING)  {
-                        primaryMetric   =     setPart_zeroSide_zeroFixCount+ setPart_oneSide_zeroFixCount;
+                        primaryMetric   =     setPart_zeroSide_zeroFixCount+ setPart_oneSide_zeroFixCount;                        
                     } 
                     secondaryMetric = ZERO; //unused
                 }
@@ -255,7 +256,7 @@ public class BCP_Propogator extends AbstractBaseBCP{
     //    
     //note : we do not consider cascading effect in this method
     //
-    protected BCP_Result getUncascadedVarFixings (List<VariableCoefficientTuple> inputVarFixings, List<HyperCube> remainingCubesAtThisLevel , 
+    protected BCP_Result getUncascadedVarFixings ( Map<String, Boolean>  inputVarFixings, List<HyperCube> remainingCubesAtThisLevel , 
                                                int thisLevel) {
         
         BCP_Result bcpResult = new BCP_Result();
@@ -270,10 +271,13 @@ public class BCP_Propogator extends AbstractBaseBCP{
                 break;
             }else if (resultFromCube.isMismatch){
                 //no fixings 
-            }else if (null !=resultFromCube.fixingList) {
+            }else if (null !=resultFromCube.fixingMap) {
                 //check conflict with  fixings found in this round
-                //if no conflict then we have found one more fixing                     
-                if (!  bcpResult.addFixing(resultFromCube.fixingList.get(ZERO), cube, thisLevel)){
+                //if no conflict then we have found one more fixing          
+                VariableCoefficientTuple  var_Fixing_Found = 
+                        new VariableCoefficientTuple  (resultFromCube.fixingMap.firstEntry().getKey(),
+                                                       resultFromCube.fixingMap.firstEntry().getValue() ? ONE : ZERO);
+                if (!  bcpResult.addFixing(var_Fixing_Found , cube, thisLevel)){
                     bcpResult.isInfeasibilityDetected=true;
                     break;
                 }
