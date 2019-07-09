@@ -22,6 +22,7 @@ import org.apache.log4j.RollingFileAppender;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Driver.DOES_MIP_HAVE_TWO_VARIABLES_IN_EVERY_CONSTRAINT;
+import ca.mcmaster.hypercube_subtraction_generic_v3.Parameters;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.*;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.ABOVE_AVG_VARS;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.bcp.BCP_LEVEL_ENUM.ALL_VARS;
@@ -143,9 +144,15 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                 if (TWO==filterResult.firstKey() &&   STEPPED_WEIGHT.equals( HEURISTIC_TO_USE) && !USE_BCP_LEVEL.equals(NO_BCP)){
                     //prepare for BCP
                     Set<String> bcpCandidateVars = this.getAllVariables_InTwoSizedHypercubes(filterResult);
+                    
                     if (EXCLUDE_CPLEX_LP_INTEGRAL_VARS) bcpCandidateVars=  this.getIntegerInfeasibleVariables( bcpCandidateVars);
                 
                     if (USE_ONLY_MAX_PSEDUDO_COST_VARS) bcpCandidateVars = getVarsWithLargestPSeudoCosts (bcpCandidateVars);
+                    
+                    if (Parameters.BRANCH_ONLY_ON_VARIABLES_IN_OBJECTIVE) bcpCandidateVars.retainAll(Driver.objectiveFunctionMap.keySet()) ;
+                    
+                     
+                    
                     
                     //if ( USE_ONLY_MAX_INFEASIBLE_VARS) bcpCandidateVars = getMostInfeasibleVaribales(bcpCandidateVars) ;
                            
@@ -190,14 +197,16 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                                                          dirs[ONE][ZERO],   lpEstimate, oneChildData );
                     
                     
-                    /*System.out.println( getNodeId() + " zero child created with " + vars[ZERO][ZERO].getName() + 
+                    /*
+                    System.out.println( getNodeId() + " zero child created with " + vars[ZERO][ZERO].getName() + 
                             " bound " + bounds[ZERO][ZERO] +
                             " dir " +  dirs[ZERO][ZERO] +
                             " id " + zeroChildID);
                     System.out.println( getNodeId() + " one  child created with " + vars[ONE][ZERO].getName() + 
                             " bound " + bounds[ONE][ZERO] +
                             " dir " +  dirs[ONE][ZERO] +
-                            " id " + oneChildID);*/
+                            " id " + oneChildID); 
+                    */
                     
 
                 }else {

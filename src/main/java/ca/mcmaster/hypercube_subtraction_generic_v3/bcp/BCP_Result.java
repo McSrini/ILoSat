@@ -51,7 +51,7 @@ public class BCP_Result {
             }
         }
         return count;
-    }
+    } 
   
     
     public boolean addFixingS (List<VariableCoefficientTuple>  varFixingFound_List, HyperCube cubeInWhichFixingsWereFound, 

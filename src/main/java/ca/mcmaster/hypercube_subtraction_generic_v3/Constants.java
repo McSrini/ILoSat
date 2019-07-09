@@ -24,7 +24,7 @@ public class Constants {
     public static final int TEN = 10;
     public static final int SIXTY = 60;
     public static final int HUNDRED = 100;
-    public static final int THOUSAND = 1000;    
+    public static final int THOUSAND = 1000; 
     public static final int BILLION = 1000000000;
        
     public static final double DOUBLE_ZERO =0 ;

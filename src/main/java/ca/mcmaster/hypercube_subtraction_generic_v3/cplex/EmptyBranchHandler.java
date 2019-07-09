@@ -5,6 +5,7 @@
  */
 package ca.mcmaster.hypercube_subtraction_generic_v3.cplex;
   
+import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.TWO;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.ZERO;
 import ilog.concert.IloException;
 import ilog.concert.IloNumVar;

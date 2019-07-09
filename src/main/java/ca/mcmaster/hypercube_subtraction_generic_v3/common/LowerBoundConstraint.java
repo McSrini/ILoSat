@@ -36,6 +36,19 @@ public class LowerBoundConstraint {
         constraintExpression.add(tuple);
     }
      
+    public LowerBoundConstraint removeVar (String var ) {
+        LowerBoundConstraint newLbc = new LowerBoundConstraint (name + "_"+ var) ;
+        newLbc.lowerBound=this.lowerBound;
+        newLbc.constraintExpression.addAll(constraintExpression);
+        int index = ZERO;
+        for (; index < constraintExpression.size(); index ++){
+            if (constraintExpression.get(index).varName.equalsIgnoreCase(var)){
+                break;
+            }
+        }
+        newLbc.constraintExpression.remove(index);
+        return newLbc;
+    }
     
     public boolean includes ( String var ){
         boolean result = false;

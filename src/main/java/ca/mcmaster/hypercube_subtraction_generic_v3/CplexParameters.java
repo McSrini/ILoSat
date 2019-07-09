@@ -25,7 +25,7 @@ public class CplexParameters {
     public static final int NODE_LOG_INTERVAL = 0; 
      
     
-    public static final boolean DISABLE_HEURISTICS= true; 
+    public static final boolean DISABLE_HEURISTICS= false; 
     public static final boolean DISABLE_PROBING= false; 
     public static final boolean DISABLE_PRESOLVENODE = false ;
     public static final boolean DISABLE_PRESOLVE = false;
@@ -38,7 +38,7 @@ public class CplexParameters {
     //use if default cplex is very slow to branch some MIPs
     //public static final boolean USE_BARRIER_AND_REDUCED_COSTS = false;
     
-    public static final int RAMP_UP_DURATION_HOURS= 2;  
+    public static final int RAMP_UP_DURATION_HOURS= 1;  
     public static final int SOLUTION_DURATION_HOURS= 20*24 ;  //20 DAYS MAXIMUM
     
 }

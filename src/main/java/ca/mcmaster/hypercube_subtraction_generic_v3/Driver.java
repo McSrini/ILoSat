@@ -96,6 +96,14 @@ public class Driver {
             IS_THIS_SET_PARTITIONING = MIPReader.isThisSetpartitioning (mip);
             
            
+            logger.info ("  preparing objective ... ");
+            objectiveFunctionMap = MIPReader.getObjective(mip);
+            
+            logger.info ("  printing var in objective ... ");
+            for (String var : objectiveFunctionMap.keySet()){
+                logger.info(" "+ var) ;
+            }
+            
                  
             logger.info ("preparing constraints ... ");
             mipConstraintList= MIPReader.getConstraintsFast(mip);
@@ -118,8 +126,6 @@ public class Driver {
             
             
             
-            logger.info ("  preparing objective ... ");
-            objectiveFunctionMap = MIPReader.getObjective(mip);
              
              
             
@@ -150,11 +156,17 @@ public class Driver {
                 collectedHypercubeMap .absorb();
             }
             
+            //drop unwanted cubes 
+            collectedHypercubeMap.dropCubesLargeThan( Parameters.DROP_HYPERCUBES_LARGER_THAN_SIZE);
+            
+            if (Parameters.RETAIN_CUBES_WITH_VARIABLES_IN_OBJECTIVE) collectedHypercubeMap.retainOnlyHypercubesWithObjectiveVars (objectiveFunctionMap.keySet()) ;
+            
             collectedHypercubeMap.printCollectedHypercubes(true);
             
             
             //this call is needed to remove cubes marked as merged or absorbed
-            collectedHypercubeMap.getCollectedCubes();
+            collectedHypercubeMap.getCollectedCubes();           
+           
             
             //check if all vars in mip are same sign, this is a final variable
             ARE_ALL_VARS_SAME_SIGN = areAllvarsOfSameSign();
@@ -447,7 +459,14 @@ public class Driver {
         
                 
         logger.info (" ENABLE_TWO_SIDED_BCP_METRIC " + ENABLE_TWO_SIDED_BCP_METRIC); 
-                        
+        
+        //added more params
+        //
+        logger.info ("  DROP_HYPERCUBES_LARGER_THAN_SIZE " + Parameters.DROP_HYPERCUBES_LARGER_THAN_SIZE);         
+        logger.info ("  BRANCH_ONLY_ON_VARIABLES_IN_OBJECTIVE " + Parameters.BRANCH_ONLY_ON_VARIABLES_IN_OBJECTIVE); 
+        logger.info ("  DETECT_SET_PARTITIONING_CONSTRAINT " + Parameters.DETECT_SET_PARTITIONING_CONSTRAINT); 
+        logger.info ("  RETAIN_CUBES_WITH_VARIABLES_IN_OBJECTIVE " + Parameters.RETAIN_CUBES_WITH_VARIABLES_IN_OBJECTIVE); 
+        
     }    
     
 }

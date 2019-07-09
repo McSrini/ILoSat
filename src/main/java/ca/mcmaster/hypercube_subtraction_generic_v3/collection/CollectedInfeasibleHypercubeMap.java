@@ -9,9 +9,11 @@ import static ca.mcmaster.hypercube_subtraction_generic_v3.Constants.*;
 import static ca.mcmaster.hypercube_subtraction_generic_v3.Parameters.*;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.HyperCube;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -27,6 +29,22 @@ public class CollectedInfeasibleHypercubeMap {
     
     public CollectedInfeasibleHypercubeMap (){
         
+    }
+    
+    //delete all hypercubes that do not contian at least 1 var from argument
+    public void retainOnlyHypercubesWithObjectiveVars (Set<String> varsInObjectiveFunction) {
+        for (Entry<Integer, List<HyperCube>> entry : collectedHypercubes.entrySet() ){
+            int key = entry.getKey();
+            List<HyperCube> cubeList = entry.getValue();
+            pruneCubeList (cubeList,   varsInObjectiveFunction) ;
+        }
+    }
+    
+    public void dropCubesLargeThan (int size) {
+        int max = Collections.max(collectedHypercubes.keySet());
+        for (int key = size+ONE; key <= max; key++){
+            collectedHypercubes.remove(key);
+        }
     }
     
     //add cubes of given size, after deleting duplicates
@@ -183,5 +201,38 @@ public class CollectedInfeasibleHypercubeMap {
         return result;
     }
     
+    private void pruneCubeList (List<HyperCube> cubeList,  Set<String> varsInObjectiveFunction) {
+        
+        List<HyperCube> resultList = new ArrayList<HyperCube> ();
+        
+        for (HyperCube hcube:cubeList){
+            if (cubeContains (hcube,varsInObjectiveFunction )){
+                resultList.add (hcube );
+            }
+        }
+        
+        cubeList.clear();
+        cubeList.addAll (resultList);
+        
+    }
+    
+    private boolean cubeContains (HyperCube hcube,  Set<String> varsInObjectiveFunction ){
+        boolean result = false;
+        
+        for (String var : hcube.zeroFixingsMap.keySet()){
+            if (varsInObjectiveFunction.contains(var)){
+                result = true;
+                break;
+            }
+        }
+        for (String var : hcube.oneFixingsMap.keySet()){
+            if (varsInObjectiveFunction.contains(var)){
+                result = true;
+                break;
+            }
+        }
+        
+        return result;
+    }
    
 }

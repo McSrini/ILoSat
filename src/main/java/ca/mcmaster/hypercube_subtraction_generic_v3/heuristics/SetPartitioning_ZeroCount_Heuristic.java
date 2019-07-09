@@ -13,8 +13,10 @@ import ca.mcmaster.hypercube_subtraction_generic_v3.Driver;
 import ca.mcmaster.hypercube_subtraction_generic_v3.common.HyperCube;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -29,24 +31,17 @@ import java.util.Set;
 public class SetPartitioning_ZeroCount_Heuristic extends BaseHeuristic{
     
     public List<String> getBranchingVariableSuggestions() {
-        
-        //smallest cubes
-        Set<String> varsInSmallestCubes = new HashSet<String> ();
-        List<HyperCube> smallestCubes =this.infeasibleHypercubeMap.firstEntry().getValue();
-        for (HyperCube smallCube : smallestCubes)     {
-            varsInSmallestCubes.addAll(smallCube.zeroFixingsMap.keySet());
-        }
          
-        //highest frequency var among smallest cubes
+        Map<String, Integer>  zeroFixingCountMap = new HashMap <String, Integer> () ;
+         
+        //highest frequency var  
         for (Entry <Integer, List<HyperCube>>  entry :this.infeasibleHypercubeMap.entrySet()){
-            
+                       
             for (HyperCube hcube : entry.getValue()) {
                 
                 Set<String> vars = hcube.zeroFixingsMap.keySet();
                  
-                for (String var: vars){     
-                    
-                    if (!  varsInSmallestCubes.contains(var)) continue;
+                for (String var: vars){   
                     
                     Integer currentScore = this.scoreMap_Regular.get(var);
                     if (null==currentScore){  
@@ -54,6 +49,17 @@ public class SetPartitioning_ZeroCount_Heuristic extends BaseHeuristic{
                     }else {
                         this.scoreMap_Regular.put(var, currentScore+ONE );
                     }
+                    
+                    
+                    int size = entry.getKey() ;
+                    Integer current = zeroFixingCountMap.get (var );
+                    if ( null == current){
+                        zeroFixingCountMap.put (var , size -ONE ) ;
+                    }else {                        
+                        zeroFixingCountMap.put (var , current+  size -ONE ) ;
+                    }
+                    
+                    
                 }
                 
             }
@@ -61,12 +67,30 @@ public class SetPartitioning_ZeroCount_Heuristic extends BaseHeuristic{
         
         //pick vars with highest score
         List<String> candidateVars = new ArrayList<String> ();
+      
+        
+        int highestKnownZeroFixCount = -ONE;
         final int maxScore = Collections.max( scoreMap_Regular.values());
         for (Entry <String, Integer>  scoreEntry : scoreMap_Regular.entrySet()){
+            
             if (maxScore == scoreEntry.getValue()){
-                candidateVars.add(scoreEntry.getKey()) ;
+                
+                //zero fixes count is used as tie break
+                int thisZeroFixCount = zeroFixingCountMap.get(scoreEntry.getKey() );
+                
+                if (thisZeroFixCount> highestKnownZeroFixCount) {
+                    candidateVars.clear();
+                    highestKnownZeroFixCount = thisZeroFixCount;
+                    candidateVars.add(scoreEntry.getKey()) ;
+                }else if (highestKnownZeroFixCount == thisZeroFixCount) {
+                    //
+                    candidateVars.add(scoreEntry.getKey()) ;
+                }
+                
             }
         }
+        
+        
                 
         return candidateVars;          
         

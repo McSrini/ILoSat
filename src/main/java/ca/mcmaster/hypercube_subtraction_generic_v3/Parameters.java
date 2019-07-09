@@ -20,6 +20,21 @@ public class Parameters {
     //public static final String MIP_FILENAME = "2club200v.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\2club200v.mps";
     
+    //public static final String MIP_FILENAME = "Purolator_LTL17.sav.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\Purolator_LTL17.sav.pre.lp";
+    
+    //public static final String MIP_FILENAME = "Purolator_LTL16.sav.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\Purolator_LTL16.sav.pre.lp";
+    
+    //public static final String MIP_FILENAME = "Purolator_LTL15.sav.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\Purolator_LTL15.sav.pre.lp";
+    
+    //public static final String MIP_FILENAME = "Purolator_LTL14.sav.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\Purolator_LTL14.sav.pre.lp";
+    
+    public static final String MIP_FILENAME = "Purolator_LTL10.sav.pre.lp";
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\Purolator_LTL10.sav.pre.lp";
+    
     //public static final String MIP_FILENAME = "bnatt500.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\bnatt500.mps";
     //eq test all vars including integral
@@ -55,11 +70,12 @@ public class Parameters {
     //set partitioning    
     //public static final String MIP_FILENAME = "neos-807456.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\neos-807456.mps"; 
-    public static final String MIP_FILENAME = "ds.mps";
+    //public static final String MIP_FILENAME = "ds.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\ds.mps";
     //public static final String MIP_FILENAME = "t1722.mps";
     //public static final String MIP_FILENAME = "F:\\temporary files here\\t1722.mps";
-     
+    //public static final String MIP_FILENAME = "neos-807456.pre.lp";  
+    //public static final String MIP_FILENAME = "F:\\temporary files here\\neos-807456.pre.lp";  
  
     
     
@@ -166,20 +182,21 @@ public class Parameters {
     public static final long PERF_VARIABILITY_RANDOM_SEED = 0;
     public static final java.util.Random  PERF_VARIABILITY_RANDOM_GENERATOR = new  java.util.Random  (PERF_VARIABILITY_RANDOM_SEED);
   
+    //public static final boolean  USE_PURE_CPLEX = true;
     public static final boolean  USE_PURE_CPLEX = false;
    
     //collect the best vertex, and all adjacent vertices, and vertices adajacent to adjacent vertices, and so on
     //set to 0 to collect only the best vertex, and to a large numberto collect all
     public static final int NUM_ADJACENT_VERTICES_TO_COLLECT = BILLION;
     //if too many hypercubes for a constraint, discard them all
-    public static final int MAX_HYPERCUBES_PER_CONSTRAINT= BILLION;
+    public static final int MAX_HYPERCUBES_PER_CONSTRAINT= 1;
     
     public static final int MAX_VARIABLES_PER_CONSTRAINT= BILLION;
     
     public static final boolean MERGE_COLLECTED_HYPERCUBES = false;
     public static final boolean ABSORB_COLLECTED_HYPERCUBES = false;
     
-    public static final BRANCHING_HEURISTIC_ENUM HEURISTIC_TO_USE = BRANCHING_HEURISTIC_ENUM.SET_PARTITIONING_HEURISTIC ;
+    public static final BRANCHING_HEURISTIC_ENUM HEURISTIC_TO_USE = BRANCHING_HEURISTIC_ENUM.STEPPED_WEIGHT ;
         
     public static final int LOOKAHEAD_LEVELS_MOMS =  BILLION;
     public static final int MAX_DEPTH_LEVELS_JERRY_WANG =  TEN;
@@ -193,18 +210,24 @@ public class Parameters {
     //use this parameter to do multiple rounds of collection
     public static final int NUMBER_OF_ADDITIONAL_HYPERCUBE_COLLECTION_ROUNDS = ZERO;
     
-    public static final boolean CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL =  true  ;
+    //use this when # of small hypercubes is already quite large
+    public static final int DROP_HYPERCUBES_LARGER_THAN_SIZE = 2; 
+    
+    public static final boolean CONSIDER_PARTLY_MATCHED_CUBES_FOR_BCP_VOLUME_REMOVAL =  false  ;
     public static final boolean ENABLE_TWO_SIDED_BCP_METRIC = false  ;
     
-    public static final BCP_LEVEL_ENUM USE_BCP_LEVEL = BCP_LEVEL_ENUM.NO_BCP     ;
+    public static final BCP_LEVEL_ENUM USE_BCP_LEVEL = BCP_LEVEL_ENUM.ONLY_MAXFREQ_VARS     ;
     public static final boolean EXCLUDE_CPLEX_LP_INTEGRAL_VARS =  true     ;
     public static final boolean USE_ONLY_MAX_PSEDUDO_COST_VARS = false;
      
-    public static final boolean ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP = false  ;
+    public static final boolean ENABLE_EQUIVALENT_TRIGGER_CHECK_FOR_BCP = true  ;
     
     public static final boolean FORCE_STATIC_VARIABLE_PRIORITIES= false;
     public static final boolean DETECT_STATIC_VARIABLE_PRIORITIES= false;
      
-     
+    public static final boolean DETECT_SET_PARTITIONING_CONSTRAINT= false; //do not advertize, do not use (keep at false)
+    
+    public static final boolean BRANCH_ONLY_ON_VARIABLES_IN_OBJECTIVE= true;
+    public static final boolean RETAIN_CUBES_WITH_VARIABLES_IN_OBJECTIVE= true;
 }
 
